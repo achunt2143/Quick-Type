@@ -40,4 +40,37 @@ class MainActivity : AppCompatActivity() {
                 .show()
         }
     }
+    @Override
+    override fun onStart() {
+        super.onStart()
+    }
+    @Override
+    override fun onResume() {
+        super.onResume()
+    }
+    @Override
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+    }
+    @Override
+    override fun onStop() {
+        super.onStop()
+    }
+    @Override
+    override fun onPause() {
+        super.onPause()
+        onStop()
+    }
+    @Override
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+    }
+    @Override
+    override fun onRestart() {
+        super.onRestart()
+    }
+    @Override
+    override fun onDestroy() {
+        super.onDestroy()
+    }
 }
