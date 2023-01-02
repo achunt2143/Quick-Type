@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/searchJT"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:actionViewClass="android.widget.SearchView"
+    android:showAsAction="collapseActionView|never"
+    app:defaultNavHost="true">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:isScrollContainer="true">
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg"
+            >
+
+            <ImageView
+                android:id="@+id/justType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="64dp"
+                android:adjustViewBounds="true"
+                android:background="@android:color/transparent"
+                android:contextClickable="true"
+                android:scaleType="centerInside"
+                android:src="@drawable/searchpillnew"
+                app:layout_constraintBottom_toTopOf="@+id/justtype_view"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <EditText
+                android:id="@+id/jtInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="64dp"
+                android:background="@android:color/transparent"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:hint="Just Type..."
+                android:scrollHorizontally="true"
+                android:singleLine="true"
+                android:textColorHint="@color/white"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="italic"
+                app:layout_constraintBottom_toBottomOf="@+id/justType"
+                app:layout_constraintEnd_toEndOf="@+id/justType"
+                app:layout_constraintStart_toStartOf="@+id/justType"
+                app:layout_constraintTop_toTopOf="@+id/justType" />
+
+            <ImageView
+                android:id="@+id/webSearch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/justtype_view"
+                android:adjustViewBounds="true"
+                android:scaleType="fitXY"
+                android:src="@drawable/searchpillnoicon"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/justtype_view"
+                app:layout_constraintBottom_toBottomOf="parent">
+
+            </ImageView>
+
+            <TextView
+                android:id="@+id/webText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:scrollHorizontally="true"
+                android:singleLine="true"
+                android:text="Search the web"
+                android:textAlignment="viewStart"
+                android:textColor="@color/white"
+                android:textStyle="italic"
+                app:layout_constraintBottom_toBottomOf="@+id/webSearch"
+                app:layout_constraintEnd_toEndOf="@+id/webSearch"
+                app:layout_constraintStart_toStartOf="@+id/webSearch"
+                app:layout_constraintTop_toTopOf="@+id/webSearch" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/justtype_view"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:animationCache="true"
+                android:overScrollMode="ifContentScrolls"
+                app:layout_constraintBottom_toTopOf="@+id/webSearch"
+                app:layout_constraintTop_toBottomOf="@+id/justType"
+                app:layout_constraintStart_toStartOf="parent">
+
+            </androidx.recyclerview.widget.RecyclerView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
