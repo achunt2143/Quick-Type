@@ -133,7 +133,7 @@ class JTAdapter(c: Context, q: String) :
                 val pos = adapterPosition
                 val context = v.context
                 val launchIntent = context.packageManager.getLaunchIntentForPackage(
-                    jtList!![pos]?.packageName.toString()
+                jtList!![pos]?.packageName.toString()
                 )
                 context.startActivity(launchIntent)
             }

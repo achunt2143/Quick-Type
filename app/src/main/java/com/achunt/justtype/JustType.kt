@@ -91,19 +91,27 @@ class JustType : androidx.fragment.app.Fragment(),
             override fun afterTextChanged(s: Editable) {
                 if (jt.text.toString().isNotEmpty()) {
                     if (jt.text.toString().startsWith("call")) {
+                        println("we are in starts with call")
+                        //recyclerView.recycledViewPool.clear()
                         recyclerView.adapter = cAdapter
                         b = true
                         if (jt.text.toString().length > 4) {
+                            println("now make visible")
+                            recyclerView.visibility = View.VISIBLE
                             val contact: Array<String> =
                                 jt.text.toString().split(" ").toTypedArray()
                             if (contact[1].isNotEmpty()) {
+                                println("calling text change")
                                 onQueryTextChange(contact[1])
                             }
                         } else {
+                            println("else make invisible")
                             recyclerView.visibility = View.INVISIBLE
                         }
                     } else {
+                        println("else back to justtype")
                         b = false
+                        //recyclerView.recycledViewPool.clear()
                         recyclerView.adapter = jtAdapter
                         onQueryTextChange(jt.text.toString())
                     }
@@ -114,7 +122,7 @@ class JustType : androidx.fragment.app.Fragment(),
                 }
             }
         })
-        cAdapter = ContactsAdapter(true, cName, cNumber, cPhoto)
+        //cAdapter = ContactsAdapter(true, cName, cNumber, cPhoto)
     }
 
     private fun textChange(view: View) {
@@ -153,6 +161,7 @@ class JustType : androidx.fragment.app.Fragment(),
     }
 
     private fun contactsSearch() {
+        println("contacts search start")
         val phones: Cursor? = this.requireContext().contentResolver
             .query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null)
         /*if (phones != null) {
@@ -181,6 +190,7 @@ class JustType : androidx.fragment.app.Fragment(),
                     phones.getString(lookupColumn)
                 )
                 if (i > 0) {
+                    println("adding to test first")
                     if (!cNameTest[i - 1]?.contains(contactName)!!) {
                         cNameTest.add(i, contactName)
                         cNumberTest.add(i, contactNumber)
@@ -188,6 +198,7 @@ class JustType : androidx.fragment.app.Fragment(),
                         i++
                     }
                 } else {
+                    println("adding to test")
                     cNameTest.add(i, contactName)
                     cNumberTest.add(i, contactNumber)
                     cPhotoTest.add(i, contactUri)
@@ -198,9 +209,12 @@ class JustType : androidx.fragment.app.Fragment(),
         cName = cNameTest as ArrayList<String>
         cNumber = cNumberTest as ArrayList<String>
         cPhoto = cPhotoTest as ArrayList<Uri>
+        println("reassigned and cname size ${cName.size}")
         contactNumber = ""
         contactName = ""
+        println("done contacts")
         phones?.close()
+        cAdapter = ContactsAdapter(true, cName, cNumber, cPhoto)
     }
 
     private fun webSearch() {
@@ -342,6 +356,7 @@ class JustType : androidx.fragment.app.Fragment(),
 
     override fun onQueryTextChange(newText: String): Boolean {
         if (b) {
+            println("if b cadapter")
             cAdapter.filter.filter(newText)
         } else {
             jtAdapter.filter.filter(newText)

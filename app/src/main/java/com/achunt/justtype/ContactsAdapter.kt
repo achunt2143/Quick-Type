@@ -18,15 +18,15 @@ class ContactsAdapter(
     cPhoto: ArrayList<Uri>
 ) :
     RecyclerView.Adapter<ContactsAdapter.ViewHolder>(), Filterable {
-    var cListUri: MutableList<Uri>
+    var cListUri: MutableList<Uri> = ArrayList()
     var cListNumber: MutableList<String>
     var isCall = false
 
     init {
-        cListUri = ArrayList()
-        cListName = ArrayList()
+        println("cName size ${cName.size}")
+        cListName = cName
         cListNameNew = ArrayList()
-        cListNumber = ArrayList()
+        cListNumber = cNumber
         cList = ArrayList()
         cListAll = ArrayList()
         for (i in cName.indices) {
@@ -35,6 +35,7 @@ class ContactsAdapter(
             cListNumber.add(cNumber[i])
             cList.add(cName[i] + " " + cNumber[i])
         }
+        cList.sort()
         isCall = call
         cListAll.addAll(cList)
     }
@@ -47,42 +48,57 @@ class ContactsAdapter(
         return object : Filter() {
             override fun performFiltering(charSequence: CharSequence): FilterResults {
                 val charString = charSequence.toString()
+                println("start filter clistall size ${cListAll.size}")
                 if (charString.isEmpty()) {
+                    println("is empty")
                     cListNameNew = cList
                 } else {
+                    println("else")
                     val filteredList: MutableList<String> = ArrayList()
                     for (c in cListAll) {
+                        //println("printing c $c")
                         if (c.lowercase(Locale.getDefault())
-                                .contains(charString.lowercase(Locale.getDefault()))
+                                .startsWith(charString.lowercase(Locale.getDefault()))
                         ) {
+                           // println("add all")
                             filteredList.add(c)
                         }
                     }
                     cListNameNew = filteredList
                 }
-                cList.clear();
+                //cList.clear();
                 val filterResults = FilterResults()
                 filterResults.values = cListNameNew
+                println("return")
                 return filterResults
             }
 
             override fun publishResults(charSequence: CharSequence, filterResults: FilterResults) {
                 cList.clear()
+                notifyDataSetChanged()
                 cList.addAll((filterResults.values as ArrayList<String>))
+                println("notify set change")
                 notifyDataSetChanged()
             }
         }
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, i: Int) {
-        try {
-            val cLabel = cList[i]
-            val textView = viewHolder.textView
-            textView.text = cLabel
-            val imageView = viewHolder.img
-            imageView.visibility = View.INVISIBLE
-        } catch (e: Exception) {
-            e.printStackTrace()
+        if(i>=0) {
+            try {
+                val cLabel = cList[i]
+                val textView = viewHolder.textView
+                textView.text = cLabel
+                val imageView = viewHolder.img
+                imageView.visibility = View.INVISIBLE
+            } catch (e: Exception) {
+                e.printStackTrace()
+                val cLabel = "No contact found"
+                val textView = viewHolder.textView
+                textView.text = cLabel
+                val imageView = viewHolder.img
+                imageView.visibility = View.INVISIBLE
+            }
         }
     }
 
@@ -103,10 +119,10 @@ class ContactsAdapter(
             if (isCall) {
                 itemView.setOnClickListener { v: View ->
                     val split =
-                        textView.text.toString().split(" ").toTypedArray()
+                        textView.text.toString().replace("[^0-9]".toRegex(), "")
                     val context = v.context
                     val intent = Intent(Intent.ACTION_DIAL)
-                    intent.data = Uri.parse("tel:" + split[1] + split[2])
+                    intent.data = Uri.parse("tel:" + split/*cList[adapterPosition]split[1] + split[2]*/)
                     context.startActivity(intent)
                 }
             } else {
