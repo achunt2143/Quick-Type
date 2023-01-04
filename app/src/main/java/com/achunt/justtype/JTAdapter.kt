@@ -19,52 +19,48 @@ import java.util.function.Function
 class JTAdapter(c: Context, q: String) :
     RecyclerView.Adapter<JTAdapter.ViewHolder>(), Filterable {
     init {
-        Thread {
-            val pm = c.packageManager
-            jtList = ArrayList<AppInfo?>()
-            jtListNew = ArrayList<AppInfo?>()
-            jtListAll = ArrayList<AppInfo?>()
-            val i = Intent(Intent.ACTION_MAIN, null)
-            i.addCategory(Intent.CATEGORY_LAUNCHER)
-            val allApps = pm.queryIntentActivities(i, 0)
-            if (q.isEmpty()) {
-                for (ri in allApps) {
-                    val app = AppInfo()
-                    app.label = ri.loadLabel(pm)
-                    app.packageName = ri.activityInfo.packageName
-                    app.icon = ri.activityInfo.loadIcon(pm)
+        val pm = c.packageManager
+        jtList = ArrayList<AppInfo?>()
+        jtListNew = ArrayList<AppInfo?>()
+        jtListAll = ArrayList<AppInfo?>()
+        val i = Intent(Intent.ACTION_MAIN, null)
+        i.addCategory(Intent.CATEGORY_LAUNCHER)
+        val allApps = pm.queryIntentActivities(i, 0)
+        if (q.isEmpty()) {
+            for (ri in allApps) {
+                val app = AppInfo()
+                app.label = ri.loadLabel(pm)
+                app.packageName = ri.activityInfo.packageName
+                app.icon = ri.activityInfo.loadIcon(pm)
+                jtList!!.add(app)
+            }
+            jtListAll!!.addAll(jtList!!)
+            try {
+                (jtList as ArrayList<AppInfo?>).sortWith(
+                    Comparator.comparing<AppInfo, _> { o: AppInfo -> o.label.toString() }
+                )
+            } catch (e: Exception) {
+                Log.d("Error", e.toString())
+            }
+        } else {
+            for (ri in allApps) {
+                val app = AppInfo()
+                app.label = ri.loadLabel(pm)
+                app.packageName = ri.activityInfo.packageName
+                app.icon = ri.activityInfo.loadIcon(pm)
+                if (app.label.toString().lowercase(Locale.getDefault()).startsWith(q)) {
                     jtList!!.add(app)
                 }
-                jtListAll!!.addAll(jtList!!)
-                try {
-                    (jtList as ArrayList<AppInfo?>).sortWith(
-                        Comparator.comparing<AppInfo, _>(
-                            Function<AppInfo, _> { o: AppInfo -> o.label.toString() })
-                    )
-                } catch (e: Exception) {
-                    Log.d("Error", e.toString())
-                }
-            } else {
-                for (ri in allApps) {
-                    val app = AppInfo()
-                    app.label = ri.loadLabel(pm)
-                    app.packageName = ri.activityInfo.packageName
-                    app.icon = ri.activityInfo.loadIcon(pm)
-                    if (app.label.toString().lowercase(Locale.getDefault()).startsWith(q)) {
-                        jtList!!.add(app)
-                    }
-                }
-                jtListAll!!.addAll(jtList!!)
-                try {
-                    (jtList as ArrayList<AppInfo?>).sortWith(
-                        Comparator.comparing<AppInfo, _>(
-                            Function<AppInfo, _> { o: AppInfo -> o.label.toString() })
-                    )
-                } catch (e: Exception) {
-                    Log.d("Error", e.toString())
-                }
             }
-        }.start()
+            jtListAll!!.addAll(jtList!!)
+            try {
+                (jtList as ArrayList<AppInfo?>).sortWith(
+                    Comparator.comparing<AppInfo, _> { o: AppInfo -> o.label.toString() }
+                )
+            } catch (e: Exception) {
+                Log.d("Error", e.toString())
+            }
+        }
     }
 
     override fun getItemCount(): Int {

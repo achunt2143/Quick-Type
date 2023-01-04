@@ -23,7 +23,6 @@ class ContactsAdapter(
     var isCall = false
 
     init {
-        println("cName size ${cName.size}")
         cListName = cName
         cListNameNew = ArrayList()
         cListNumber = cNumber
@@ -48,28 +47,21 @@ class ContactsAdapter(
         return object : Filter() {
             override fun performFiltering(charSequence: CharSequence): FilterResults {
                 val charString = charSequence.toString()
-                println("start filter clistall size ${cListAll.size}")
                 if (charString.isEmpty()) {
-                    println("is empty")
                     cListNameNew = cList
                 } else {
-                    println("else")
                     val filteredList: MutableList<String> = ArrayList()
                     for (c in cListAll) {
-                        //println("printing c $c")
                         if (c.lowercase(Locale.getDefault())
                                 .startsWith(charString.lowercase(Locale.getDefault()))
                         ) {
-                           // println("add all")
                             filteredList.add(c)
                         }
                     }
                     cListNameNew = filteredList
                 }
-                //cList.clear();
                 val filterResults = FilterResults()
                 filterResults.values = cListNameNew
-                println("return")
                 return filterResults
             }
 
@@ -77,7 +69,6 @@ class ContactsAdapter(
                 cList.clear()
                 notifyDataSetChanged()
                 cList.addAll((filterResults.values as ArrayList<String>))
-                println("notify set change")
                 notifyDataSetChanged()
             }
         }
@@ -122,7 +113,7 @@ class ContactsAdapter(
                         textView.text.toString().replace("[^0-9]".toRegex(), "")
                     val context = v.context
                     val intent = Intent(Intent.ACTION_DIAL)
-                    intent.data = Uri.parse("tel:" + split/*cList[adapterPosition]split[1] + split[2]*/)
+                    intent.data = Uri.parse("tel:" + split)
                     context.startActivity(intent)
                 }
             } else {
