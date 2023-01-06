@@ -106,7 +106,6 @@ class ContactsAdapter(
         init {
             textView = itemView.findViewById(R.id.jt_app_name)
             img = itemView.findViewById(R.id.jt_app_icon)
-            val et = itemView.findViewById<EditText>(R.id.jtInput)
             if (isCall) {
                 itemView.setOnClickListener { v: View ->
                     val split =
@@ -118,18 +117,11 @@ class ContactsAdapter(
                 }
             } else {
                 itemView.setOnClickListener { v: View ->
-                    val text =
-                        et.text.toString().split(" ").toTypedArray()
-                    var toSend = ""
-                    for (i in 5 until text.size) {
-                        toSend += text[i]
-                    }
                     val split =
-                        textView.text.toString().split(" ").toTypedArray()
+                        textView.text.toString().replace("[^0-9]".toRegex(), "")
                     val context = v.context
-                    val uri = Uri.parse("smsto:" + split[1])
+                    val uri = Uri.parse("smsto:" + split)
                     val intent = Intent(Intent.ACTION_SENDTO, uri)
-                    intent.putExtra("sms_body", toSend)
                     context.startActivity(intent)
                 }
             }

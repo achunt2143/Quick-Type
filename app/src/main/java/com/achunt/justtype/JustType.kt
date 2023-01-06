@@ -15,15 +15,15 @@ import android.view.ViewGroup
 import android.view.Window
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.*
-import kotlin.collections.ArrayList
+
 
 class JustType : androidx.fragment.app.Fragment(),
     androidx.appcompat.widget.SearchView.OnQueryTextListener {
@@ -31,6 +31,7 @@ class JustType : androidx.fragment.app.Fragment(),
     private lateinit var layoutManager: RecyclerView.LayoutManager
     lateinit var jt: EditText
     private lateinit var wbjt: TextView
+    private lateinit var wbimg: ImageView
     lateinit var jtAdapter: JTAdapter
     lateinit var cAdapter: ContactsAdapter
 
@@ -92,6 +93,8 @@ class JustType : androidx.fragment.app.Fragment(),
         }
         val w: Window = requireActivity().window
         w.statusBarColor = ContextCompat.getColor(requireActivity(), R.color.status)
+        wbjt = view.findViewById(R.id.webText)
+        wbimg = view.findViewById(R.id.webSearch)
 
         jt.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
@@ -99,9 +102,28 @@ class JustType : androidx.fragment.app.Fragment(),
             override fun afterTextChanged(s: Editable) {
                 if (jt.text.toString().isNotEmpty()) {
                     if (jt.text.toString().startsWith("call")) {
-                        recyclerView.adapter = cAdapter
                         b = true
+                        cAdapter.isCall = true
+                        recyclerView.adapter = cAdapter
                         if (jt.text.toString().length > 4) {
+                            recyclerView.visibility = View.VISIBLE
+                            val contact: Array<String> =
+                                jt.text.toString().split(" ").toTypedArray()
+                            if (contact[1].isNotEmpty()) {
+
+                                onQueryTextChange(contact[1])
+                            }
+                        } else {
+                            recyclerView.visibility = View.INVISIBLE
+                            wbjt.visibility = View.VISIBLE
+                            wbimg.visibility = View.VISIBLE
+                        }
+                    } else if (jt.text.toString().startsWith("text")){
+                        b = true
+                        cAdapter.isCall = false
+                        recyclerView.adapter = cAdapter
+                        if (jt.text.toString().length > 4) {
+
                             recyclerView.visibility = View.VISIBLE
                             val contact: Array<String> =
                                 jt.text.toString().split(" ").toTypedArray()
@@ -110,6 +132,8 @@ class JustType : androidx.fragment.app.Fragment(),
                             }
                         } else {
                             recyclerView.visibility = View.INVISIBLE
+                            wbjt.visibility = View.VISIBLE
+                            wbimg.visibility = View.VISIBLE
                         }
                     } else {
                         b = false
@@ -119,6 +143,7 @@ class JustType : androidx.fragment.app.Fragment(),
                     recyclerView.visibility = View.VISIBLE
                     textChange(view)
                 } else {
+                    wbjt.text = "Search the web for"
                     recyclerView.visibility = View.INVISIBLE
                 }
             }
@@ -130,7 +155,7 @@ class JustType : androidx.fragment.app.Fragment(),
         wbjt.text = "Search the web for " + jt.text.toString()
         wbjt.setOnClickListener { webSearch() }
         numberTest = wbjt.text.toString()
-        if (jt.text.toString().lowercase(Locale.getDefault()).contains("send a text to")) {
+        if (jt.text.toString().lowercase(Locale.getDefault()).contains("text")) {
             if (wbjt.text.toString().lowercase(Locale.getDefault())
                     .contains("search the web for ")
             ) {
@@ -139,24 +164,27 @@ class JustType : androidx.fragment.app.Fragment(),
                 temp = t[1]
                 wbjt.text = temp
             }
-            wbjt.setOnClickListener {
-                if (wbjt.text.toString().lowercase(Locale.getDefault())
-                        .startsWith(contactName)
-                ) {
-                    sendText(wbjt.text.toString())
-                } else if (Character.isDigit(numberTest[0])) {
-                    sendText(wbjt.text.toString())
-                }
+
+            if (wbjt.text.toString().lowercase(Locale.getDefault())
+                    .startsWith(contactName)
+            ) {
+                sendText(wbjt.text.toString(), view)
+            } else if (Character.isDigit(numberTest[0])) {
+                sendText(wbjt.text.toString(), view)
             }
+
         }
-        if (jt.text.toString().lowercase(Locale.getDefault()).contains("search youtube for")) {
+        if (jt.text.toString().lowercase(Locale.getDefault()).contains("youtube")) {
             searchYoutube(wbjt.text.toString())
         }
-        if (jt.text.toString().lowercase(Locale.getDefault()).contains("search maps for")) {
+        if (jt.text.toString().lowercase(Locale.getDefault()).contains("maps")) {
             searchMaps(wbjt.text.toString())
         }
         if (jt.text.toString().lowercase(Locale.getDefault()).startsWith("call")) {
-            doCall(wbjt.text.toString())
+            doCall(wbjt.text.toString(), view)
+        }
+        if (jt.text.toString().lowercase(Locale.getDefault()).startsWith("wikipedia")) {
+            searchWikipedia(wbjt.text.toString())
         }
     }
 
@@ -200,7 +228,7 @@ class JustType : androidx.fragment.app.Fragment(),
         contactNumber = ""
         contactName = ""
         phones?.close()
-        cAdapter = ContactsAdapter(true, cName, cNumber, cPhoto)
+        cAdapter = ContactsAdapter(b, cName, cNumber, cPhoto)
     }
 
     private fun webSearch() {
@@ -209,9 +237,12 @@ class JustType : androidx.fragment.app.Fragment(),
         startActivity(intent)
     }
 
-    private fun sendText(text: String) {
+    private fun sendText(text: String, view: View) {
+        wbjt = view.findViewById(R.id.webText)
+        wbimg = view.findViewById(R.id.webSearch)
         var toSend = ""
-        val split1: Array<String> = text.split("send a text to ").toTypedArray()
+        val split1: Array<String> = text.split("text ").toTypedArray()
+        if (split1.size>2){
         val m1 = split1[1]
         val split2: Array<String> = m1.split(" ").toTypedArray()
         val m2 = split2[0]
@@ -224,6 +255,8 @@ class JustType : androidx.fragment.app.Fragment(),
         for (t in cName.indices) {
             cont = m2.substring(0, 1).uppercase(Locale.getDefault()) + m2.substring(1)
             if (cName[t].startsWith(cont)) {
+                wbjt.visibility = View.INVISIBLE
+                wbimg.visibility = View.INVISIBLE
                 contactName = cName[t]
                 contactNumber = cNumber[t]
             }
@@ -236,6 +269,8 @@ class JustType : androidx.fragment.app.Fragment(),
         }
         if (m1.length > 3) {
             if (Character.isDigit(m2[0])) {
+                wbimg.visibility = View.VISIBLE
+                wbjt.visibility = View.VISIBLE
                 m3 = StringBuilder()
                 val separate: Array<String> = m2.split(" ").toTypedArray()
                 contactNumber = separate[0]
@@ -245,10 +280,13 @@ class JustType : androidx.fragment.app.Fragment(),
                 toSend = m3.toString()
             }
         }
-        val uri = Uri.parse("smsto:$contactNumber")
-        intent = Intent(Intent.ACTION_SENDTO, uri)
-        intent!!.putExtra("sms_body", toSend)
-        startActivity(intent)
+        }
+        wbjt.setOnClickListener {
+            val uri = Uri.parse("smsto:$contactNumber")
+            intent = Intent(Intent.ACTION_SENDTO, uri)
+            intent!!.putExtra("sms_body", toSend)
+            startActivity(intent)
+        }
     }
 
     private fun searchYoutube(text: String) {
@@ -259,17 +297,49 @@ class JustType : androidx.fragment.app.Fragment(),
             temp = t[1]
             wbjt.text = temp
         }
-        val split1: Array<String> = temp.split("search youtube for ").toTypedArray()
+        val split1: Array<String> = temp.split("youtube ").toTypedArray()
         if (split1.size > 1) {
             m1 = split1[1]
         }
         val finalM = m1
         wbjt.setOnClickListener {
             try {
-                intent = Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:$finalM"))
+                intent = Intent(Intent.ACTION_SEARCH)
+                intent!!.`package` = "com.google.android.youtube"
+                intent!!.putExtra("query", finalM)
+                intent!!.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 startActivity(intent)
             } catch (e: Exception) {
                 webSearch()
+            }
+        }
+    }
+
+    private fun searchWikipedia(text: String) {
+        var temp = text
+        var m1 = ""
+        if (text.contains("Search the web for ")) {
+            val t: Array<String> = temp.split("Search the web for ").toTypedArray()
+            temp = t[1]
+            wbjt.text = temp
+        }
+        val split1: Array<String> = temp.split("wikipedia ").toTypedArray()
+        if (split1.size > 1) {
+            m1 = split1[1]
+        }
+        val finalM = m1
+        wbjt.setOnClickListener {
+            try {
+                intent = Intent(Intent.ACTION_SEARCH)
+                intent!!.`package` = "org.wikipedia"
+                intent!!.putExtra("query", finalM)
+                intent!!.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                startActivity(intent)
+            } catch (e: Exception) {
+                val url = "https://en.wikipedia.org/wiki/Special:Search?search=${finalM}"
+                val i = Intent(Intent.ACTION_VIEW)
+                i.data = Uri.parse(url)
+                startActivity(i)
             }
         }
     }
@@ -282,7 +352,7 @@ class JustType : androidx.fragment.app.Fragment(),
             temp = t[1]
             wbjt.text = temp
         }
-        val split1: Array<String> = temp.split("search maps for ").toTypedArray()
+        val split1: Array<String> = temp.split("maps ").toTypedArray()
         if (split1.size > 1) {
             m1 = split1[1]
         }
@@ -298,7 +368,9 @@ class JustType : androidx.fragment.app.Fragment(),
         }
     }
 
-    private fun doCall(text: String) {
+    private fun doCall(text: String, view: View) {
+        wbjt = view.findViewById(R.id.webText)
+        wbimg = view.findViewById(R.id.webSearch)
         var temp = text
         val m1 = arrayOf("")
         if (text.contains("Search the web for ")) {
@@ -307,24 +379,28 @@ class JustType : androidx.fragment.app.Fragment(),
             wbjt.text = temp
         }
         val finalTemp = temp
-        wbjt.setOnClickListener {
-            val split1: Array<String> = finalTemp.split("call ").toTypedArray()
-            if (split1.size > 1) {
-                m1[0] = split1[1]
-                for (c in cName.indices) {
-                    val cont: String =
-                        m1[0].substring(0, 1).uppercase(Locale.getDefault()) + m1[0].substring(1)
-                    if (cName[c].startsWith(cont)) {
-                        contactName = cName[c]
-                        contactNumber = cNumber[c]
-                    }
-                }
-                if (m1[0].length > 3) {
-                    if (Character.isDigit(m1[0][0])) {
-                        contactNumber = m1[0]
-                    }
+        val split1: Array<String> = finalTemp.split("call ").toTypedArray()
+        if (split1.size > 2) {
+            m1[0] = split1[1]
+            for (c in cName.indices) {
+                val cont: String =
+                    m1[0].substring(0, 1).uppercase(Locale.getDefault()) + m1[0].substring(1)
+                if (cName[c].startsWith(cont)) {
+                    wbjt.visibility = View.INVISIBLE
+                    wbimg.visibility = View.INVISIBLE
+                    contactName = cName[c]
+                    contactNumber = cNumber[c]
                 }
             }
+            if (m1[0].length > 3) {
+                if (Character.isDigit(m1[0][0])) {
+                    contactNumber = m1[0]
+                    wbimg.visibility = View.VISIBLE
+                    wbjt.visibility = View.VISIBLE
+                }
+            }
+        }
+        wbjt.setOnClickListener {
             intent = Intent(Intent.ACTION_DIAL)
             intent!!.data = Uri.parse("tel:$contactNumber")
             startActivity(intent)

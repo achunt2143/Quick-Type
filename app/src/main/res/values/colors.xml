@@ -11,7 +11,10 @@
     <color name="light_blue_200">#FF81D4FA</color>
     <color name="light_blue_600">#FF039BE5</color>
     <color name="light_blue_900">#FF01579B</color>
-    <color name="status">#ff737373</color>
+    <color name="status">#ff595959</color>
+    <color name="fgol">#ff4d4d4d</color>
+    <color name="fgbg">#ff737373</color>
+    <color name="darkbg">#ff0d0d0d</color>
     <color name="empty">#00000000</color>
     <color name="abt">#5b92b7</color>
     <color name="first">#00aa55</color>

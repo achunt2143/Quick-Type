@@ -21,6 +21,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:background="@drawable/shape"
+        android:elevation="4dp"
         tools:ignore="MissingConstraints">
 
 
