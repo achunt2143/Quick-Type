@@ -4,23 +4,31 @@
     android:layout_height="match_parent"
     android:theme="@style/Theme.JustType.AppWidgetContainer">
 
+
+    <ImageView
+        android:id="@+id/bg"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:alpha=".50"
+        android:src="@drawable/shape" />
+
     <TextView
         android:id="@+id/appwidget_text"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_margin="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="22dp"
         android:contentDescription="@string/appwidget_text"
         android:text="@string/appwidget_text"
-        android:textSize="16sp"
         android:textColor="@color/white"
-        android:paddingStart="16dp"
+        android:textSize="16sp"
         android:textStyle="bold|italic" />
+
     <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:src="@drawable/searchpillnew"
-        android:id="@+id/bg"/>
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_alignEnd="@id/bg"
+        android:alpha=".50"
+        android:src="@drawable/search" />
+
 </RelativeLayout>
