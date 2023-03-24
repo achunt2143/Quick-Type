@@ -8,11 +8,7 @@
     android:showAsAction="collapseActionView|never"
     app:defaultNavHost="true">
 
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/transparent"
-        android:isScrollContainer="true">
+
 
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -56,6 +52,7 @@
                 app:layout_constraintEnd_toEndOf="@+id/justType"
                 app:layout_constraintStart_toStartOf="@+id/justType"
                 app:layout_constraintTop_toTopOf="@+id/justType" />
+
             <ImageView
                 android:layout_width="64dp"
                 android:layout_height="64dp"
@@ -64,58 +61,33 @@
                 app:layout_constraintEnd_toEndOf="@id/justType"
                 app:layout_constraintTop_toTopOf="@id/justType"
                 app:layout_constraintBottom_toTopOf="@id/jtInput"
-                android:src="@drawable/search"/>
-
-            <ImageView
-                android:id="@+id/webSearch"
-                android:layout_width="match_parent"
-                android:layout_height="64dp"
-                android:adjustViewBounds="true"
-                android:layout_margin="8dp"
-                android:background="@android:color/transparent"
-                android:contextClickable="true"
-                android:scaleType="centerInside"
-                android:src="@drawable/shape"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/justtype_view"
-                app:layout_constraintBottom_toBottomOf="parent">
-
-            </ImageView>
-
-            <TextView
-                android:id="@+id/webText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:scrollHorizontally="true"
-                android:singleLine="true"
-                android:text="Search the web"
-                android:textAlignment="viewStart"
-                android:textColor="@color/white"
-                android:textStyle="italic"
-                android:textSize="24dp"
-                app:layout_constraintBottom_toBottomOf="@+id/webSearch"
-                app:layout_constraintEnd_toEndOf="@+id/webSearch"
-                app:layout_constraintStart_toStartOf="@+id/webSearch"
-                app:layout_constraintTop_toTopOf="@+id/webSearch" />
+                android:src="@drawable/search" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/justtype_view"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_height="wrap_content"
                 android:animationCache="true"
                 android:overScrollMode="ifContentScrolls"
-                app:layout_constraintBottom_toTopOf="@+id/webSearch"
-                app:layout_constraintTop_toBottomOf="@+id/justType"
+                app:layout_constraintBottom_toTopOf="@+id/justtype_search"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/justType">
+
+            </androidx.recyclerview.widget.RecyclerView>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/justtype_search"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:animationCache="true"
+                android:overScrollMode="ifContentScrolls"
+                android:layout_marginTop="16dp"
+                app:layout_constraintTop_toBottomOf="@+id/justtype_view"
                 app:layout_constraintStart_toStartOf="parent">
 
             </androidx.recyclerview.widget.RecyclerView>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </androidx.cardview.widget.CardView>
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

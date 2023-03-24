@@ -5,10 +5,12 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.Filter
+import android.widget.Filterable
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class ContactsAdapter(
@@ -102,10 +104,12 @@ class ContactsAdapter(
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var textView: TextView
         var img: ImageView
+        var textField: String
 
         init {
             textView = itemView.findViewById(R.id.jt_app_name)
             img = itemView.findViewById(R.id.jt_app_icon)
+            textField = JustType.textSend
             if (isCall) {
                 itemView.setOnClickListener { v: View ->
                     val split =
@@ -119,9 +123,17 @@ class ContactsAdapter(
                 itemView.setOnClickListener { v: View ->
                     val split =
                         textView.text.toString().replace("[^0-9]".toRegex(), "")
+                    val textToExtract = textField.split((" ").toRegex())
+                    var textToSend = ""
+                    if (textToExtract.size > 1) {
+                        for (i in 2 until textToExtract.size) {
+                            textToSend += "${textToExtract[i]} "
+                        }
+                    }
                     val context = v.context
                     val uri = Uri.parse("smsto:" + split)
                     val intent = Intent(Intent.ACTION_SENDTO, uri)
+                    intent.putExtra("sms_body", textToSend.trim())
                     context.startActivity(intent)
                 }
             }

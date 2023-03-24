@@ -25,7 +25,6 @@ class MainActivity : AppCompatActivity() {
                 .replace(R.id.container, fragment)
                 .commit()
         }
-
     }
     private fun checkPermission(permission: String, requestCode: Int) {
         // Checking if permission is not granted

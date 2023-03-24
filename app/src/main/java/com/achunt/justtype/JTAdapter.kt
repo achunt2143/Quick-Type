@@ -13,7 +13,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import java.util.*
-import java.util.function.Function
 
 
 class JTAdapter(c: Context, q: String) :
@@ -43,6 +42,7 @@ class JTAdapter(c: Context, q: String) :
                 Log.d("Error", e.toString())
             }
         } else {
+            query = q
             for (ri in allApps) {
                 val app = AppInfo()
                 app.label = ri.loadLabel(pm)
@@ -140,5 +140,6 @@ class JTAdapter(c: Context, q: String) :
         var jtList: MutableList<AppInfo?>? = null
         var jtListNew: List<AppInfo?>? = null
         var jtListAll: MutableList<AppInfo?>? = null
+        var query: String = ""
     }
 }
