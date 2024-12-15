@@ -1,6 +1,7 @@
 package com.achunt.justtype
 
 import android.app.SearchManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -11,48 +12,87 @@ import android.widget.Filter
 import android.widget.Filterable
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 
 
-class SearchAdapter(q: MutableList<String>) :
+class SearchAdapter(context: Context, private var queries: MutableList<String>) :
     RecyclerView.Adapter<SearchAdapter.ViewHolder>(), Filterable {
-    init {
-        query = q
-    }
 
-    override fun getItemCount(): Int {
-        return query.size
-    }
+    private var filteredQueries: MutableList<String> = queries.toMutableList()
+    private val storedBrowserPackage = SharedPreferencesHelper.getString(context, "default_browser")
 
-    override fun onBindViewHolder(viewHolder: ViewHolder, i: Int) {
-        try {
-            viewHolder.textViewWeb.text = query[i]
-            when (i) {
-                0 -> {
-                    val browserIntent = Intent("android.intent.action.VIEW", Uri.parse("http://"))
-                    val resolveInfo = viewHolder.itemView.context.packageManager.resolveActivity(
-                        browserIntent,
-                        PackageManager.MATCH_DEFAULT_ONLY
-                    )
-                    viewHolder.imgWeb.setImageDrawable(
-                        resolveInfo!!.activityInfo.applicationInfo.loadIcon(
-                            viewHolder.itemView.context.packageManager
+
+    override fun getItemCount(): Int = filteredQueries.size
+
+    override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
+        val query = filteredQueries[position]
+        viewHolder.textViewWeb.text = query
+
+        when (position) {
+            0 -> {
+                // Get the default browser package name from SharedPreferences
+                val defaultBrowserPackageName = storedBrowserPackage
+
+                // If a default browser package name is available, use its icon
+                if (!defaultBrowserPackageName.isNullOrEmpty()) {
+                    try {
+                        val applicationInfo = viewHolder.itemView.context.packageManager.getApplicationInfo(
+                            defaultBrowserPackageName, 0
                         )
-                    )
-                }
-                1 -> {
-                    viewHolder.imgWeb.setImageResource(R.drawable.map)
-                }
-                2 -> {
-                    viewHolder.imgWeb.setImageResource(R.drawable.youtube)
-                }
-                3 -> {
-                    viewHolder.imgWeb.setImageResource(R.drawable.wiki)
+                        viewHolder.imgWeb.setImageDrawable(applicationInfo.loadIcon(viewHolder.itemView.context.packageManager))
+                    } catch (e: PackageManager.NameNotFoundException) {
+                        // In case the package name is not found, use a placeholder icon
+                        viewHolder.imgWeb.setImageDrawable(AppCompatResources.getDrawable(viewHolder.itemView.context, R.drawable.search))
+                    }
+                } else {
+                    // If no default browser is set, use the placeholder icon
+                    viewHolder.imgWeb.setImageDrawable(AppCompatResources.getDrawable(viewHolder.itemView.context, R.drawable.search))
+
+                    // If the package name is not found in SharedPreferences, fetch it in the background
+                    CoroutineScope(Dispatchers.IO).launch {
+                        // Create an intent to view a URL
+                        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("http://example.com"))
+
+                        // Resolve the intent to get the details of the activity that can handle this intent
+                        val resolveInfo = viewHolder.itemView.context.packageManager.resolveActivity(
+                            browserIntent,
+                            PackageManager.MATCH_DEFAULT_ONLY
+                        )
+
+                        // If there's a valid resolveInfo, get the package name
+                        val packageName = resolveInfo?.activityInfo?.packageName
+
+                        if (packageName != null) {
+                            // Set the package name in SharedPreferences
+                            SharedPreferencesHelper.saveString(viewHolder.itemView.context, "default_browser", packageName)
+
+                            withContext(Dispatchers.Main) {
+                                try {
+                                    val applicationInfo = viewHolder.itemView.context.packageManager.getApplicationInfo(
+                                        packageName, 0
+                                    )
+                                    viewHolder.imgWeb.setImageDrawable(applicationInfo.loadIcon(viewHolder.itemView.context.packageManager))
+                                } catch (e: PackageManager.NameNotFoundException) {
+                                    // In case the package name is not found, use a placeholder icon
+                                    viewHolder.imgWeb.setImageDrawable(AppCompatResources.getDrawable(viewHolder.itemView.context, R.drawable.search))
+                                }
+                            }
+                        }
+                    }
                 }
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
+
+
+            1 -> viewHolder.imgWeb.setImageResource(R.drawable.map)
+            2 -> viewHolder.imgWeb.setImageResource(R.drawable.youtube)
+            3 -> viewHolder.imgWeb.setImageResource(R.drawable.wiki)
+            else -> viewHolder.imgWeb.setImageResource(R.drawable.search)
         }
     }
 
@@ -62,97 +102,93 @@ class SearchAdapter(q: MutableList<String>) :
         return ViewHolder(view)
     }
 
-    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var textViewWeb: TextView
-        var imgWeb: ImageView
+    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val textViewWeb: TextView = itemView.findViewById(R.id.jt_web_name)
+        val imgWeb: ImageView = itemView.findViewById(R.id.jt_web_icon)
 
         init {
-            textViewWeb = itemView.findViewById(R.id.jt_web_name)
-            imgWeb = itemView.findViewById(R.id.jt_web_icon)
             itemView.setOnClickListener { v: View ->
+                val context = v.context
+                val query = filteredQueries[adapterPosition]
+
                 when (adapterPosition) {
                     0 -> {
-                        val intent = Intent(Intent.ACTION_WEB_SEARCH)
-                        intent.putExtra(SearchManager.QUERY, query[adapterPosition])
-                        v.context.startActivity(intent)
+                        val intent = Intent(Intent.ACTION_WEB_SEARCH).apply {
+                            putExtra(SearchManager.QUERY, query)
+                        }
+                        context.startActivity(intent)
                     }
                     1 -> {
+                        val geoUri = Uri.parse("geo:0,0?q=$query")
+                        val intent = Intent(Intent.ACTION_VIEW, geoUri)
                         try {
-                            val geo = Uri.parse("geo:0,0?q=${query[adapterPosition]}")
-                            val intent = Intent(Intent.ACTION_VIEW)
-                            intent.data = geo
-                            v.context.startActivity(intent)
+                            context.startActivity(intent)
                         } catch (e: Exception) {
-                            val intent = Intent(Intent.ACTION_WEB_SEARCH)
-                            intent.putExtra(SearchManager.QUERY, query[adapterPosition])
-                            v.context.startActivity(intent)
+                            context.startActivity(Intent(Intent.ACTION_WEB_SEARCH).apply {
+                                putExtra(SearchManager.QUERY, query)
+                            })
                         }
                     }
                     2 -> {
                         try {
-                            val intent = Intent(Intent.ACTION_SEARCH)
-                            intent.`package` = "com.google.android.youtube"
-                            intent.putExtra("query", query[adapterPosition])
-                            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                            v.context.startActivity(intent)
+                            val intent = Intent(Intent.ACTION_SEARCH).apply {
+                                `package` = "com.google.android.youtube"
+                                putExtra("query", query)
+                                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                            }
+                            context.startActivity(intent)
                         } catch (e: Exception) {
-                            val intent = Intent(Intent.ACTION_WEB_SEARCH)
-                            intent.putExtra(SearchManager.QUERY, query[adapterPosition])
-                            v.context.startActivity(intent)
+                            context.startActivity(Intent(Intent.ACTION_WEB_SEARCH).apply {
+                                putExtra(SearchManager.QUERY, query)
+                            })
                         }
                     }
                     3 -> {
                         try {
-                            val intent = Intent(Intent.ACTION_SEARCH)
-                            intent.`package` = "org.wikipedia"
-                            intent.putExtra("query", query[adapterPosition])
-                            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                            v.context.startActivity(intent)
+                            val intent = Intent(Intent.ACTION_SEARCH).apply {
+                                `package` = "org.wikipedia"
+                                putExtra("query", query)
+                                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                            }
+                            context.startActivity(intent)
                         } catch (e: Exception) {
                             val url =
-                                "https://en.wikipedia.org/wiki/Special:Search?search=${query[adapterPosition]}"
-                            val i = Intent(Intent.ACTION_VIEW)
-                            i.data = Uri.parse(url)
-                            v.context.startActivity(i)
+                                "https://en.wikipedia.org/wiki/Special:Search?search=$query"
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
                         }
+                    }
+                    else -> {
+                        // Default action for unknown positions
+                        val intent = Intent(Intent.ACTION_WEB_SEARCH).apply {
+                            putExtra(SearchManager.QUERY, query)
+                        }
+                        context.startActivity(intent)
                     }
                 }
             }
         }
-    }
-
-    companion object {
-        var query: MutableList<String> = mutableListOf()
     }
 
     override fun getFilter(): Filter {
         return object : Filter() {
             override fun performFiltering(charSequence: CharSequence): FilterResults {
-                val charString = charSequence.toString()
-                val filteredList: MutableList<String> = ArrayList<String>()
-                if (charString.isEmpty()) {
-                    filteredList.addAll(query)
+                val charString = charSequence.toString().lowercase(Locale.getDefault())
+                val filteredList = if (charString.isEmpty()) {
+                    queries
                 } else {
-                    for (c in query) {
-                        if (c.lowercase(Locale.getDefault())
-                                .startsWith(charString.lowercase(Locale.getDefault()))
-                        ) {
-                            filteredList.add(c)
-                        }
-                    }
+                    queries.filter { it.lowercase(Locale.getDefault()).contains(charString) }
+                        .toMutableList()
                 }
-                val filterResults = FilterResults()
-                filterResults.values = filteredList
-                return filterResults
+
+                return FilterResults().apply { values = filteredList }
             }
 
             override fun publishResults(charSequence: CharSequence, filterResults: FilterResults) {
-                query.clear()
-                for (i in 0..3) {
-                    query.add(i, charSequence as String)
-                }
+                @Suppress("UNCHECKED_CAST")
+                filteredQueries = filterResults.values as MutableList<String>
                 notifyDataSetChanged()
             }
         }
     }
 }
+

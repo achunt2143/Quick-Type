@@ -2,7 +2,10 @@
     style="@style/Widget.JustType.AppWidget.Container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:theme="@style/Theme.JustType.AppWidgetContainer">
+    android:theme="@style/Theme.JustType.AppWidgetContainer"
+    android:clickable="true"
+    android:focusable="true"
+    android:id="@+id/container">
 
 
     <ImageView

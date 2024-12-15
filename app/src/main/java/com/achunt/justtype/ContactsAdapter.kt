@@ -12,88 +12,15 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import java.util.*
 
-
 class ContactsAdapter(
-    call: Boolean,
-    cName: ArrayList<String>,
-    cNumber: ArrayList<String>,
-    cPhoto: ArrayList<Uri>
-) :
-    RecyclerView.Adapter<ContactsAdapter.ViewHolder>(), Filterable {
-    var cListUri: MutableList<Uri> = ArrayList()
-    var cListNumber: MutableList<String>
-    var isCall = false
+    var isCall: Boolean,
+    contacts: List<Contact>
+) : RecyclerView.Adapter<ContactsAdapter.ViewHolder>(), Filterable {
 
-    init {
-        cListName = cName
-        cListNameNew = ArrayList()
-        cListNumber = cNumber
-        cList = ArrayList()
-        cListAll = ArrayList()
-        for (i in cName.indices) {
-            cListUri.add(cPhoto[i])
-            cListName.add(cName[i])
-            cListNumber.add(cNumber[i])
-            cList.add(cName[i] + " " + cNumber[i])
-        }
-        cList.sort()
-        isCall = call
-        cListAll.addAll(cList)
-    }
+    private var filteredList: MutableList<Contact> = contacts.sortedBy { it.name }.toMutableList()
+    private val fullList: List<Contact> = filteredList.toList()
 
-    override fun getItemCount(): Int {
-        return cList.size
-    }
-
-    override fun getFilter(): Filter {
-        return object : Filter() {
-            override fun performFiltering(charSequence: CharSequence): FilterResults {
-                val charString = charSequence.toString()
-                if (charString.isEmpty()) {
-                    cListNameNew = cList
-                } else {
-                    val filteredList: MutableList<String> = ArrayList()
-                    for (c in cListAll) {
-                        if (c.lowercase(Locale.getDefault())
-                                .startsWith(charString.lowercase(Locale.getDefault()))
-                        ) {
-                            filteredList.add(c)
-                        }
-                    }
-                    cListNameNew = filteredList
-                }
-                val filterResults = FilterResults()
-                filterResults.values = cListNameNew
-                return filterResults
-            }
-
-            override fun publishResults(charSequence: CharSequence, filterResults: FilterResults) {
-                cList.clear()
-                notifyDataSetChanged()
-                cList.addAll((filterResults.values as ArrayList<String>))
-                notifyDataSetChanged()
-            }
-        }
-    }
-
-    override fun onBindViewHolder(viewHolder: ViewHolder, i: Int) {
-        if(i>=0) {
-            try {
-                val cLabel = cList[i]
-                val textView = viewHolder.textView
-                textView.text = cLabel
-                val imageView = viewHolder.img
-                imageView.visibility = View.INVISIBLE
-            } catch (e: Exception) {
-                e.printStackTrace()
-                val cLabel = "No contact found"
-                val textView = viewHolder.textView
-                textView.text = cLabel
-                val imageView = viewHolder.img
-                imageView.visibility = View.INVISIBLE
-            }
-        }
-    }
+    override fun getItemCount(): Int = filteredList.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -101,49 +28,80 @@ class ContactsAdapter(
         return ViewHolder(view)
     }
 
+    override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
+        if (position in filteredList.indices) {
+            val contact = filteredList[position]
+            viewHolder.textView.text = contact.name.ifEmpty {
+                formatPhoneNumber(contact.number) // Display only the phone number if the name is not valid.
+            }
+
+
+            // Set the contact photo if available
+            contact.photoUri?.let {
+                viewHolder.img.visibility = View.VISIBLE
+                viewHolder.img.setImageURI(it)
+            } ?: run {
+                viewHolder.img.visibility = View.INVISIBLE
+            }
+        } else {
+            viewHolder.textView.text = "No contact found"
+            viewHolder.img.visibility = View.INVISIBLE
+        }
+    }
+
+    override fun getFilter(): Filter = object : Filter() {
+        override fun performFiltering(charSequence: CharSequence?): FilterResults {
+            val query = charSequence?.toString()?.lowercase(Locale.getDefault()) ?: ""
+            val result = if (query.isEmpty()) {
+                fullList
+            } else {
+                fullList.filter {
+                    it.name.lowercase(Locale.getDefault()).contains(query) ||
+                            it.number.contains(query)
+                }
+            }
+            return FilterResults().apply { values = result }
+        }
+
+        override fun publishResults(charSequence: CharSequence?, filterResults: FilterResults?) {
+            filteredList = (filterResults?.values as? List<Contact>)?.toMutableList() ?: mutableListOf()
+            notifyDataSetChanged()
+        }
+    }
+
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var textView: TextView
-        var img: ImageView
-        var textField: String
+        val textView: TextView = itemView.findViewById(R.id.jt_app_name)
+        val img: ImageView = itemView.findViewById(R.id.jt_app_icon)
 
         init {
-            textView = itemView.findViewById(R.id.jt_app_name)
-            img = itemView.findViewById(R.id.jt_app_icon)
-            textField = JustType.textSend
-            if (isCall) {
-                itemView.setOnClickListener { v: View ->
-                    val split =
-                        textView.text.toString().replace("[^0-9]".toRegex(), "")
-                    val context = v.context
-                    val intent = Intent(Intent.ACTION_DIAL)
-                    intent.data = Uri.parse("tel:" + split)
-                    context.startActivity(intent)
-                }
-            } else {
-                itemView.setOnClickListener { v: View ->
-                    val split =
-                        textView.text.toString().replace("[^0-9]".toRegex(), "")
-                    val textToExtract = textField.split((" ").toRegex())
-                    var textToSend = ""
-                    if (textToExtract.size > 1) {
-                        for (i in 2 until textToExtract.size) {
-                            textToSend += "${textToExtract[i]} "
-                        }
+            itemView.setOnClickListener {
+                val contact = filteredList[adapterPosition]
+                val context = itemView.context
+
+                if (isCall) {
+                    val intent = Intent(Intent.ACTION_DIAL).apply {
+                        data = Uri.parse("tel:${contact.number}")
                     }
-                    val context = v.context
-                    val uri = Uri.parse("smsto:" + split)
-                    val intent = Intent(Intent.ACTION_SENDTO, uri)
-                    intent.putExtra("sms_body", textToSend.trim())
+                    context.startActivity(intent)
+                } else {
+                    val textArray = JustType.textSend.split(" ")
+                    val messageBody = textArray.drop(2).joinToString(" ").trim()
+                    val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:${contact.number}")).apply {
+                        putExtra("sms_body", messageBody)
+                    }
                     context.startActivity(intent)
                 }
             }
         }
     }
 
-    companion object {
-        lateinit var cListName: MutableList<String>
-        lateinit var cListNameNew: List<String>
-        lateinit var cList: MutableList<String>
-        lateinit var cListAll: MutableList<String>
+    fun formatPhoneNumber(phoneNumber: String): String {
+        val cleaned = phoneNumber.filter { it.isDigit() } // Ensure only digits are processed
+        return when {
+            cleaned.length == 10 -> "(${cleaned.substring(0, 3)}) ${cleaned.substring(3, 6)}-${cleaned.substring(6)}"
+            cleaned.length == 11 && cleaned.startsWith("1") -> "+1 (${cleaned.substring(1, 4)}) ${cleaned.substring(4, 7)}-${cleaned.substring(7)}"
+            else -> phoneNumber // Return original if the format isn't standard
+        }
     }
+
 }
