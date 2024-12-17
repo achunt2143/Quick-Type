@@ -24,17 +24,17 @@ class ContactsAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        val view: View = inflater.inflate(R.layout.jt_item_row_layout, parent, false)
+        val view: View = inflater.inflate(R.layout.contact_item, parent, false)
         return ViewHolder(view)
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         if (position in filteredList.indices) {
             val contact = filteredList[position]
-            viewHolder.textView.text = contact.name.ifEmpty {
-                formatPhoneNumber(contact.number) // Display only the phone number if the name is not valid.
-            }
 
+            // Set the contact name and number
+            viewHolder.nameTextView.text = contact.name.ifEmpty { "Unknown Name" }
+            viewHolder.numberTextView.text = formatPhoneNumber(contact.number)
 
             // Set the contact photo if available
             contact.photoUri?.let {
@@ -44,10 +44,12 @@ class ContactsAdapter(
                 viewHolder.img.visibility = View.INVISIBLE
             }
         } else {
-            viewHolder.textView.text = "No contact found"
+            viewHolder.nameTextView.text = "No contact found"
+            viewHolder.numberTextView.text = ""
             viewHolder.img.visibility = View.INVISIBLE
         }
     }
+
 
     override fun getFilter(): Filter = object : Filter() {
         override fun performFiltering(charSequence: CharSequence?): FilterResults {
@@ -70,8 +72,9 @@ class ContactsAdapter(
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val textView: TextView = itemView.findViewById(R.id.jt_app_name)
-        val img: ImageView = itemView.findViewById(R.id.jt_app_icon)
+        val nameTextView: TextView = itemView.findViewById(R.id.contact_name)
+        val numberTextView: TextView = itemView.findViewById(R.id.contact_number)
+        val img: ImageView = itemView.findViewById(R.id.contact_icon)
 
         init {
             itemView.setOnClickListener {
@@ -95,7 +98,8 @@ class ContactsAdapter(
         }
     }
 
-    fun formatPhoneNumber(phoneNumber: String): String {
+
+    private fun formatPhoneNumber(phoneNumber: String): String {
         val cleaned = phoneNumber.filter { it.isDigit() } // Ensure only digits are processed
         return when {
             cleaned.length == 10 -> "(${cleaned.substring(0, 3)}) ${cleaned.substring(3, 6)}-${cleaned.substring(6)}"

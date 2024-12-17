@@ -1,24 +1,29 @@
 package com.achunt.justtype
 
 import android.content.Context
+import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.achunt.justtype.databinding.JusttypeSearchBinding
+import com.achunt.justtype.databinding.SettingsMenuItemBinding
 import kotlinx.coroutines.*
+
 
 class JustType : Fragment(), androidx.appcompat.widget.SearchView.OnQueryTextListener {
 
@@ -39,11 +44,14 @@ class JustType : Fragment(), androidx.appcompat.widget.SearchView.OnQueryTextLis
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
+        val startTime = System.currentTimeMillis()
         binding = JusttypeSearchBinding.inflate(inflater, container, false)
+        Log.d("StartupTime", "OnCreateView took ${System.currentTimeMillis() - startTime} ms")
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val startTime = System.currentTimeMillis()
         super.onViewCreated(view, savedInstanceState)
         jt = binding.jtInput
 
@@ -68,6 +76,7 @@ class JustType : Fragment(), androidx.appcompat.widget.SearchView.OnQueryTextLis
                 }
             }
         })
+        Log.d("StartupTime", "OnViewCreated took ${System.currentTimeMillis() - startTime} ms")
     }
 
     private fun initializeRecyclerView(view: View) {
@@ -83,13 +92,14 @@ class JustType : Fragment(), androidx.appcompat.widget.SearchView.OnQueryTextLis
     }
 
     private fun configureKeyboardAndStatusBar(view: View) {
-        view.clearFocus() // Clear focus from other views.
+        val startTime = System.currentTimeMillis()
         jt.requestFocus()
         jt.post {
             val imm = view.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.showSoftInput(jt, InputMethodManager.SHOW_IMPLICIT)
         }
         requireActivity().window.statusBarColor = ContextCompat.getColor(requireActivity(), R.color.status)
+        Log.d("StartupTime", "Focus took ${System.currentTimeMillis() - startTime} ms")
     }
 
 
@@ -98,6 +108,7 @@ class JustType : Fragment(), androidx.appcompat.widget.SearchView.OnQueryTextLis
         when {
             input.startsWith("call") -> handleCallCommand(input)
             input.startsWith("text") -> handleTextCommand(input)
+            input == "20090606" -> handleSettingsCommand()
             input.isNotEmpty() -> handleSearchCommand(input)
             else -> resetViewStates()
         }
@@ -142,16 +153,27 @@ class JustType : Fragment(), androidx.appcompat.widget.SearchView.OnQueryTextLis
         toggleRecyclerViews(showRecyclerView = true, showSearchView = true)
     }
 
+    private fun handleSettingsCommand() {
+        toggleRecyclerViews(showRecyclerView = false, showSearchView = false)
+        binding.jtSettings.settingsItem.setOnClickListener {
+            val intent = Intent(this.activity, SettingsActivity::class.java)
+            startActivity(intent)
+        }
+    }
+
     private fun resetViewStates() {
         toggleRecyclerViews(showRecyclerView = false, showSearchView = false)
+        binding.jtSettings.settingsItem.visibility = View.INVISIBLE
     }
 
     private fun toggleRecyclerViews(showRecyclerView: Boolean, showSearchView: Boolean) {
+        binding.jtSettings.settingsItem.visibility = if (!showRecyclerView && !showSearchView) View.VISIBLE else View.INVISIBLE
         recyclerView.visibility = if (showRecyclerView) View.VISIBLE else View.INVISIBLE
         searchRecyclerView.visibility = if (showSearchView) View.VISIBLE else View.INVISIBLE
     }
 
     private fun contactsSearch() {
+        val startTime = System.currentTimeMillis()
         val projection = arrayOf(
             ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
             ContactsContract.CommonDataKinds.Phone.NUMBER,
@@ -176,6 +198,7 @@ class JustType : Fragment(), androidx.appcompat.widget.SearchView.OnQueryTextLis
             }
         }
         cAdapter = ContactsAdapter(b, contacts)
+        Log.d("StartupTime", "Contact search took ${System.currentTimeMillis() - startTime} ms")
     }
 
     override fun onQueryTextSubmit(query: String): Boolean {

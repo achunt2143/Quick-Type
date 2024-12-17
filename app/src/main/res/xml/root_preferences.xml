@@ -1,0 +1,22 @@
+<PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/logs_header">
+
+        <!-- Toggle for enabling/disabling logs -->
+        <SwitchPreferenceCompat
+            app:key="enable_logs"
+            app:title="@string/logs_title"
+            app:summary="@string/logs_summary"
+            app:defaultValue="false" />
+
+        <!-- Dummy preference for the "Collect Logs" button -->
+        <Preference
+            app:key="collect_logs"
+            app:title="@string/collect_logs_title"
+            app:dependency="enable_logs"
+            app:summary="@string/collect_logs_summary" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -4,4 +4,18 @@
     <string name="configure">Configure</string>
     <string name="add_widget">Add widget</string>
     <string name="app_widget_description">Quick Type Widget</string>
+    <string name="contact_photo">contact photo</string>
+    <string name="search_icon">search icon</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="settings">Settings</string>
+
+    <!-- Preference Titles -->
+    <string name="logs_header">Logs</string>
+
+    <!-- Logs Preferences -->
+    <string name="logs_title">Enable Logging</string>
+    <string name="logs_summary">Turn logging on or off</string>
+    <string name="collect_logs_title">Collect Logs</string>
+    <string name="collect_logs_summary">Tap to collect and share logs</string>
+
 </resources>

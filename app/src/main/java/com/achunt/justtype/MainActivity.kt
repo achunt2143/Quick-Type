@@ -3,6 +3,7 @@ package com.achunt.justtype
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -11,8 +12,9 @@ import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        val startTime = System.currentTimeMillis()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS)
             != PackageManager.PERMISSION_GRANTED
         ) {
@@ -25,6 +27,8 @@ class MainActivity : AppCompatActivity() {
                 .replace(R.id.container, fragment)
                 .commit()
         }
+        setContentView(R.layout.activity_main)
+        Log.d("StartupTime", "OnCreate took ${System.currentTimeMillis() - startTime} ms")
     }
     private fun checkPermission(permission: String, requestCode: Int) {
         // Checking if permission is not granted

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Toggle for enabling/disabling logs -->
+    <SwitchPreferenceCompat
+        android:key="enable_logs"
+        android:title="Enable Logs"
+        android:summary="Turn logging on or off"
+        android:defaultValue="false" />
+
+    <!-- Dummy preference for the "Collect Logs" button -->
+    <Preference
+        android:key="collect_logs"
+        android:title="Collect Logs"
+        android:summary="Tap to collect and share logs" />
+
+</PreferenceScreen>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/searchJT"
@@ -12,6 +13,7 @@
     android:focusableInTouchMode="false"
     tools:ignore="MissingConstraints">
 
+    <!-- Background Container -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -19,73 +21,94 @@
         android:focusable="false"
         android:focusableInTouchMode="false">
 
-        <ImageView
-            android:id="@+id/justType"
+        <!-- Search Input Container -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/justTypeContainer"
             android:layout_width="match_parent"
             android:layout_height="64dp"
-            android:adjustViewBounds="true"
             android:layout_margin="8dp"
-            android:background="@android:color/transparent"
-            android:contextClickable="true"
-            android:scaleType="centerInside"
-            android:src="@drawable/shape"
-            app:layout_constraintBottom_toTopOf="@+id/justtype_view"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent">
 
-        <EditText
-            android:id="@+id/jtInput"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginEnd="72dp"
-            android:background="@android:color/transparent"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:hint="Just Type..."
-            android:scrollHorizontally="true"
-            android:singleLine="true"
-            android:textColorHint="@color/white"
-            android:textColor="@color/white"
-            android:textSize="24sp"
-            android:textStyle="italic"
-            app:layout_constraintBottom_toBottomOf="@+id/justType"
-            app:layout_constraintEnd_toEndOf="@+id/justType"
-            app:layout_constraintStart_toStartOf="@+id/justType"
-            app:layout_constraintTop_toTopOf="@+id/justType" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/fgbg">
 
-        <ImageView
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_marginTop="48dp"
-            app:layout_constraintStart_toEndOf="@+id/jtInput"
-            app:layout_constraintEnd_toEndOf="@id/justType"
-            app:layout_constraintTop_toTopOf="@id/justType"
-            app:layout_constraintBottom_toTopOf="@id/jtInput"
-            android:src="@drawable/search" />
+                <!-- Search Icon (Left) -->
+                <ImageView
+                    android:id="@+id/searchIcon"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="16dp"
+                    android:contentDescription="@string/search_icon"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_launcher_foreground"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
 
+                <!-- Editable Input -->
+                <EditText
+                    android:id="@+id/jtInput"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@android:color/transparent"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:hint="Just Type..."
+                    android:scrollHorizontally="true"
+                    android:singleLine="true"
+                    android:textColorHint="@color/white"
+                    android:textColor="@color/white"
+                    android:textSize="24sp"
+                    android:textStyle="italic"
+                    app:layout_constraintStart_toEndOf="@+id/searchIcon"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Main RecyclerView for Data -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/justtype_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:animationCache="true"
             android:overScrollMode="ifContentScrolls"
+            app:layout_constraintTop_toBottomOf="@id/justTypeContainer"
             app:layout_constraintBottom_toTopOf="@+id/justtype_search"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/justType"
+            app:layout_constraintEnd_toEndOf="parent"
             tools:ignore="RecycleViewScroll" />
 
+        <!-- Search Results RecyclerView -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/justtype_search"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:animationCache="true"
             android:overScrollMode="ifContentScrolls"
-            android:layout_marginTop="16dp"
             app:layout_constraintTop_toBottomOf="@+id/justtype_view"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             tools:ignore="RecycleViewScroll" />
+
+        <include layout="@layout/settings_menu_item"
+            android:id="@+id/jt_settings"
+            app:layout_constraintTop_toBottomOf="@id/justTypeContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -10,7 +10,6 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
 
-
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -21,6 +20,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.JustType"
         tools:targetApi="31">
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:label="@string/title_activity_settings" />
+
         <receiver
             android:name=".JustTypeWidget"
             android:exported="false">
@@ -32,7 +36,6 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/just_type_widget_info" />
         </receiver>
-
 
         <activity
             android:name=".MainActivity"
