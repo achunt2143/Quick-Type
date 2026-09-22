@@ -3,77 +3,54 @@ package com.achunt.justtype
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
+import android.view.KeyEvent
+import android.widget.EditText
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        val startTime = System.currentTimeMillis()
-        super.onCreate(savedInstanceState)
 
+    private val requestContactsLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            lifecycleScope.launch(Dispatchers.IO) {
+                ContactRepository.getContacts(applicationContext, forceReload = true)
+            }
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        androidx.preference.PreferenceManager.setDefaultValues(this, R.xml.root_preferences, false)
+        setContentView(R.layout.activity_main)
+
+        // Request contacts permission seamlessly if not granted
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS)
             != PackageManager.PERMISSION_GRANTED
         ) {
-            // Permission is not granted
-            checkPermission(Manifest.permission.READ_CONTACTS, 1)
+            requestContactsLauncher.launch(Manifest.permission.READ_CONTACTS)
         }
+
         if (savedInstanceState == null) {
-            val fragment = JustType()
             supportFragmentManager.beginTransaction()
-                .replace(R.id.container, fragment)
+                .replace(R.id.container, JustType())
                 .commit()
         }
-        setContentView(R.layout.activity_main)
-        Log.d("StartupTime", "OnCreate took ${System.currentTimeMillis() - startTime} ms")
     }
-    private fun checkPermission(permission: String, requestCode: Int) {
-        // Checking if permission is not granted
-        if (ContextCompat.checkSelfPermission(
-                this@MainActivity,
-                permission
-            ) == PackageManager.PERMISSION_DENIED
-        ) {
-            ActivityCompat.requestPermissions(this@MainActivity, arrayOf(permission), requestCode)
-        } else {
-            Toast.makeText(this@MainActivity, "Permission already granted", Toast.LENGTH_SHORT)
-                .show()
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        // Forward hardware keyboard strokes directly to the search input if not already focused
+        if (event != null && event.isPrintingKey) {
+            val searchInput = findViewById<EditText>(R.id.jtInput)
+            if (searchInput != null && !searchInput.isFocused) {
+                searchInput.requestFocus()
+            }
         }
-    }
-    @Override
-    override fun onStart() {
-        super.onStart()
-    }
-    @Override
-    override fun onResume() {
-        super.onResume()
-    }
-    @Override
-    override fun onUserLeaveHint() {
-        super.onUserLeaveHint()
-    }
-    @Override
-    override fun onStop() {
-        super.onStop()
-    }
-    @Override
-    override fun onPause() {
-        super.onPause()
-        onStop()
-    }
-    @Override
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        super.onWindowFocusChanged(hasFocus)
-    }
-    @Override
-    override fun onRestart() {
-        super.onRestart()
-    }
-    @Override
-    override fun onDestroy() {
-        super.onDestroy()
+        return super.onKeyDown(keyCode, event)
     }
 }

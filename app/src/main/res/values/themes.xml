@@ -6,26 +6,35 @@
         <item name="colorPrimaryVariant">@color/status</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/fgol</item>
+        <item name="colorSecondary">@color/accent_blue</item>
         <item name="colorSecondaryVariant">@color/darkbg</item>
         <item name="colorOnSecondary">@color/white</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">@color/status</item>
-        <!-- Customize your theme here. -->
+        <!-- Colors -->
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:windowBackground">@color/darkbg</item>
+        <item name="colorSurface">@color/card_bg</item>
+    </style>
+
+    <!-- Settings Activity Theme with ActionBar -->
+    <style name="Theme.JustType.Settings" parent="Theme.MaterialComponents.DayNight">
+        <item name="colorPrimary">@color/card_bg</item>
+        <item name="colorPrimaryVariant">@color/darkbg</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/accent_blue</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:windowBackground">@color/darkbg</item>
+        <item name="colorSurface">@color/card_bg</item>
     </style>
 
     <style name="Theme.JustType.AppWidgetContainerParent" parent="@android:style/Theme.DeviceDefault">
         <!-- Radius of the outer bound of widgets to make the rounded corners -->
         <item name="appWidgetRadius">16dp</item>
-        <!--
-        Radius of the inner view's bound of widgets to make the rounded corners.
-        It needs to be 8dp or less than the value of appWidgetRadius
-        -->
         <item name="appWidgetInnerRadius">8dp</item>
     </style>
 
     <style name="Theme.JustType.AppWidgetContainer" parent="Theme.JustType.AppWidgetContainerParent">
-        <!-- Apply padding to avoid the content of the widget colliding with the rounded corners -->
         <item name="appWidgetPadding">16dp</item>
     </style>
 </resources>

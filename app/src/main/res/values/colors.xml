@@ -14,7 +14,13 @@
     <color name="status">#ff595959</color>
     <color name="fgol">#ff4d4d4d</color>
     <color name="fgbg">#ff737373</color>
-    <color name="darkbg">#ff0d0d0d</color>
+    <color name="darkbg">#ff121212</color>
+    <color name="card_bg">#ff242424</color>
+    <color name="card_stroke">#ff383838</color>
+    <color name="text_primary">#ffffff</color>
+    <color name="text_secondary">#b0b0b0</color>
+    <color name="accent_blue">#3399ff</color>
+    <color name="accent_green">#30d158</color>
     <color name="empty">#00000000</color>
     <color name="abt">#5b92b7</color>
     <color name="first">#00aa55</color>

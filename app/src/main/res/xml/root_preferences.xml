@@ -1,22 +1,175 @@
 <PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory app:title="@string/logs_header">
-
-        <!-- Toggle for enabling/disabling logs -->
+    <PreferenceCategory
+        android:title="@string/pref_cat_search_categories"
+        app:title="@string/pref_cat_search_categories">
         <SwitchPreferenceCompat
-            app:key="enable_logs"
-            app:title="@string/logs_title"
-            app:summary="@string/logs_summary"
+            android:key="category_apps"
+            app:key="category_apps"
+            android:title="@string/pref_apps_title"
+            app:title="@string/pref_apps_title"
+            android:summary="@string/pref_apps_summary"
+            app:summary="@string/pref_apps_summary"
+            android:defaultValue="true"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="category_contacts"
+            app:key="category_contacts"
+            android:title="@string/pref_contacts_title"
+            app:title="@string/pref_contacts_title"
+            android:summary="@string/pref_contacts_summary"
+            app:summary="@string/pref_contacts_summary"
+            android:defaultValue="true"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="category_actions"
+            app:key="category_actions"
+            android:title="@string/pref_actions_title"
+            app:title="@string/pref_actions_title"
+            android:summary="@string/pref_actions_summary"
+            app:summary="@string/pref_actions_summary"
+            android:defaultValue="true"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="category_calc"
+            app:key="category_calc"
+            android:title="@string/pref_calc_title"
+            app:title="@string/pref_calc_title"
+            android:summary="@string/pref_calc_summary"
+            app:summary="@string/pref_calc_summary"
+            android:defaultValue="true"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="category_web"
+            app:key="category_web"
+            android:title="@string/pref_web_title"
+            app:title="@string/pref_web_title"
+            android:summary="@string/pref_web_summary"
+            app:summary="@string/pref_web_summary"
+            android:defaultValue="true"
+            app:defaultValue="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_cat_web_engines"
+        app:title="@string/pref_cat_web_engines">
+        <SwitchPreferenceCompat
+            android:key="engine_google"
+            app:key="engine_google"
+            android:title="@string/pref_engine_google"
+            app:title="@string/pref_engine_google"
+            android:defaultValue="true"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="engine_maps"
+            app:key="engine_maps"
+            android:title="@string/pref_engine_maps"
+            app:title="@string/pref_engine_maps"
+            android:defaultValue="true"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="engine_youtube"
+            app:key="engine_youtube"
+            android:title="@string/pref_engine_youtube"
+            app:title="@string/pref_engine_youtube"
+            android:defaultValue="true"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="engine_wikipedia"
+            app:key="engine_wikipedia"
+            android:title="@string/pref_engine_wikipedia"
+            app:title="@string/pref_engine_wikipedia"
+            android:defaultValue="true"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="engine_duckduckgo"
+            app:key="engine_duckduckgo"
+            android:title="@string/pref_engine_duckduckgo"
+            app:title="@string/pref_engine_duckduckgo"
+            android:defaultValue="false"
             app:defaultValue="false" />
 
-        <!-- Dummy preference for the "Collect Logs" button -->
-        <Preference
-            app:key="collect_logs"
-            app:title="@string/collect_logs_title"
-            app:dependency="enable_logs"
-            app:summary="@string/collect_logs_summary" />
+        <SwitchPreferenceCompat
+            android:key="engine_reddit"
+            app:key="engine_reddit"
+            android:title="@string/pref_engine_reddit"
+            app:title="@string/pref_engine_reddit"
+            android:defaultValue="false"
+            app:defaultValue="false" />
 
+        <SwitchPreferenceCompat
+            android:key="engine_github"
+            app:key="engine_github"
+            android:title="@string/pref_engine_github"
+            app:title="@string/pref_engine_github"
+            android:defaultValue="false"
+            app:defaultValue="false" />
+
+        <SwitchPreferenceCompat
+            android:key="engine_amazon"
+            app:key="engine_amazon"
+            android:title="@string/pref_engine_amazon"
+            app:title="@string/pref_engine_amazon"
+            android:defaultValue="false"
+            app:defaultValue="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_cat_history"
+        app:title="@string/pref_cat_history">
+        <Preference
+            android:key="reset_history"
+            app:key="reset_history"
+            android:title="@string/pref_reset_history_title"
+            app:title="@string/pref_reset_history_title"
+            android:summary="@string/pref_reset_history_summary"
+            app:summary="@string/pref_reset_history_summary" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_cat_about"
+        app:title="@string/pref_cat_about">
+        <Preference
+            android:key="about_tribute"
+            app:key="about_tribute"
+            android:title="@string/pref_about_title"
+            app:title="@string/pref_about_title"
+            android:summary="@string/pref_about_summary"
+            app:summary="@string/pref_about_summary" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/logs_header"
+        app:title="@string/logs_header">
+        <SwitchPreferenceCompat
+            android:key="enable_logs"
+            app:key="enable_logs"
+            android:title="@string/logs_title"
+            app:title="@string/logs_title"
+            android:summary="@string/logs_summary"
+            app:summary="@string/logs_summary"
+            android:defaultValue="false"
+            app:defaultValue="false" />
+
+        <Preference
+            android:key="collect_logs"
+            app:key="collect_logs"
+            android:title="@string/collect_logs_title"
+            app:title="@string/collect_logs_title"
+            android:dependency="enable_logs"
+            app:dependency="enable_logs"
+            android:summary="@string/collect_logs_summary"
+            app:summary="@string/collect_logs_summary" />
     </PreferenceCategory>
 
 </PreferenceScreen>

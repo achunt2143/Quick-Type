@@ -6,13 +6,57 @@
     <string name="app_widget_description">Quick Type Widget</string>
     <string name="contact_photo">contact photo</string>
     <string name="search_icon">search icon</string>
-    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="title_activity_settings">Quick Type Settings</string>
     <string name="settings">Settings</string>
 
-    <!-- Preference Titles -->
-    <string name="logs_header">Logs</string>
+    <!-- Section Headers -->
+    <string name="section_applications">Applications</string>
+    <string name="section_contacts">Contacts</string>
+    <string name="section_quick_actions">Quick Actions</string>
+    <string name="section_search_everywhere">Search Everywhere</string>
+    <string name="section_calculator">Calculation</string>
 
-    <!-- Logs Preferences -->
+    <!-- Settings Categories -->
+    <string name="pref_cat_search_categories">Search Categories</string>
+    <string name="pref_cat_web_engines">Search Providers</string>
+    <string name="pref_cat_history">Usage &amp; History</string>
+    <string name="pref_cat_about">About Quick Type</string>
+
+    <!-- Category Toggles -->
+    <string name="pref_apps_title">Applications</string>
+    <string name="pref_apps_summary">Search installed apps and show frequent apps</string>
+    <string name="pref_contacts_title">Contacts</string>
+    <string name="pref_contacts_summary">Search contacts with direct call and message actions</string>
+    <string name="pref_actions_title">Quick Actions</string>
+    <string name="pref_actions_summary">New note, calendar event, timer, and email</string>
+    <string name="pref_calc_title">Calculator</string>
+    <string name="pref_calc_summary">Inline evaluation of mathematical expressions</string>
+    <string name="pref_web_title">Web Search</string>
+    <string name="pref_web_summary">Search Google, Maps, YouTube, Wikipedia, and more</string>
+
+    <!-- Web Engines -->
+    <string name="pref_engine_google">Google Web Search</string>
+    <string name="pref_engine_maps">Google Maps</string>
+    <string name="pref_engine_youtube">YouTube</string>
+    <string name="pref_engine_wikipedia">Wikipedia</string>
+    <string name="pref_engine_duckduckgo">DuckDuckGo</string>
+    <string name="pref_engine_reddit">Reddit</string>
+    <string name="pref_engine_github">GitHub</string>
+    <string name="pref_engine_amazon">Amazon</string>
+
+    <!-- History / Reset -->
+    <string name="pref_reset_history_title">Reset Launch History</string>
+    <string name="pref_reset_history_summary">Clear app launch frequency statistics</string>
+
+    <!-- About & Tribute -->
+    <string name="pref_about_title">webOS Just Type Tribute</string>
+    <string name="pref_about_summary">Inspired by the legendary Just Type feature from Palm / HP webOS (2009–2011).</string>
+
+    <!-- Quick Settings Tile -->
+    <string name="tile_label">Just Type</string>
+
+    <!-- Preference Titles -->
+    <string name="logs_header">Developer &amp; Diagnostics</string>
     <string name="logs_title">Enable Logging</string>
     <string name="logs_summary">Turn logging on or off</string>
     <string name="collect_logs_title">Collect Logs</string>

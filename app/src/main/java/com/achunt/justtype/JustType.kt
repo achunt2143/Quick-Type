@@ -2,238 +2,239 @@ package com.achunt.justtype
 
 import android.content.Context
 import android.content.Intent
-import android.database.Cursor
-import android.net.Uri
 import android.os.Bundle
-import android.provider.ContactsContract
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
-import androidx.cardview.widget.CardView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.achunt.justtype.databinding.JusttypeSearchBinding
-import com.achunt.justtype.databinding.SettingsMenuItemBinding
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
+class JustType : Fragment() {
 
-class JustType : Fragment(), androidx.appcompat.widget.SearchView.OnQueryTextListener {
+    private var _binding: JusttypeSearchBinding? = null
+    private val binding get() = _binding!!
 
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var searchRecyclerView: RecyclerView
-    private lateinit var jt: EditText
-    private lateinit var cAdapter: ContactsAdapter
-    private val jtAdapter by lazy { JTAdapter(requireContext()) }
-    private val searchAdapter by lazy { context?.let { SearchAdapter(it, qSearch) } }
-    private lateinit var binding: JusttypeSearchBinding
+    // Adapters
+    private lateinit var calculationAdapter: CalculationAdapter
+    private lateinit var appsHeaderAdapter: SectionHeaderAdapter
+    private lateinit var appsAdapter: JTAdapter
+    private lateinit var contactsHeaderAdapter: SectionHeaderAdapter
+    private lateinit var contactsAdapter: ContactsAdapter
+    private lateinit var actionsHeaderAdapter: SectionHeaderAdapter
+    private lateinit var actionsAdapter: QuickActionsAdapter
+    private lateinit var webHeaderAdapter: SectionHeaderAdapter
+    private lateinit var webAdapter: SearchAdapter
 
-    private var qSearch: MutableList<String> = MutableList(4) { "web" }
-    private var b = false
     private var debounceJob: Job? = null
-
-    private val contacts = mutableListOf<Contact>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        val startTime = System.currentTimeMillis()
-        binding = JusttypeSearchBinding.inflate(inflater, container, false)
-        Log.d("StartupTime", "OnCreateView took ${System.currentTimeMillis() - startTime} ms")
+        _binding = JusttypeSearchBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val startTime = System.currentTimeMillis()
         super.onViewCreated(view, savedInstanceState)
-        jt = binding.jtInput
 
-        initializeRecyclerView(view)
-        configureKeyboardAndStatusBar(view)
+        setupRecyclerView()
+        setupSearchInput()
+        setupButtons()
+        setupWindowInsets()
+        configureKeyboardAndStatusBar()
 
-        CoroutineScope(Dispatchers.IO).launch {
-            contactsSearch()
-
-            withContext(Dispatchers.Main) {
-                recyclerView.adapter = jtAdapter
-                searchRecyclerView.adapter = searchAdapter
-            }
+        // Load data in background and present initial view
+        viewLifecycleOwner.lifecycleScope.launch {
+            val context = requireContext()
+            AppRepository.getApps(context)
+            ContactRepository.getContacts(context)
+            updateResults(binding.jtInput.text.toString())
         }
+    }
 
-        jt.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable) {
-                debounce {
-                    handleCommandInput(s.toString())
+    private fun setupRecyclerView() {
+        calculationAdapter = CalculationAdapter()
+        appsHeaderAdapter = SectionHeaderAdapter(getString(R.string.section_applications))
+        appsAdapter = JTAdapter(requireContext())
+        contactsHeaderAdapter = SectionHeaderAdapter(getString(R.string.section_contacts))
+        contactsAdapter = ContactsAdapter()
+        actionsHeaderAdapter = SectionHeaderAdapter(getString(R.string.section_quick_actions))
+        actionsAdapter = QuickActionsAdapter()
+        webHeaderAdapter = SectionHeaderAdapter(getString(R.string.section_search_everywhere))
+        webAdapter = SearchAdapter()
+
+        val concatAdapter = ConcatAdapter(
+            calculationAdapter,
+            appsHeaderAdapter,
+            appsAdapter,
+            contactsHeaderAdapter,
+            contactsAdapter,
+            actionsHeaderAdapter,
+            actionsAdapter,
+            webHeaderAdapter,
+            webAdapter
+        )
+
+        binding.unifiedRecyclerView.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = concatAdapter
+            itemAnimator = null // Avoid flicker during fast typing
+        }
+    }
+
+    private fun setupSearchInput() {
+        binding.jtInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                binding.btnClear.isVisible = !s.isNullOrEmpty()
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                val text = s?.toString().orEmpty()
+                if (text == "20090606") {
+                    Toast.makeText(
+                        requireContext(),
+                        "Palm Pre Launch: June 6, 2009 🌴 - webOS Just Type",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+
+                debounce(120) {
+                    updateResults(text)
                 }
             }
         })
-        Log.d("StartupTime", "OnViewCreated took ${System.currentTimeMillis() - startTime} ms")
     }
 
-    private fun initializeRecyclerView(view: View) {
-        recyclerView = view.findViewById<RecyclerView>(R.id.justtype_view).apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            visibility = View.INVISIBLE
+    private fun setupButtons() {
+        binding.btnClear.setOnClickListener {
+            binding.jtInput.text?.clear()
+            binding.jtInput.requestFocus()
         }
 
-        searchRecyclerView = view.findViewById<RecyclerView>(R.id.justtype_search).apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            visibility = View.INVISIBLE
-        }
-    }
-
-    private fun configureKeyboardAndStatusBar(view: View) {
-        val startTime = System.currentTimeMillis()
-        jt.requestFocus()
-        jt.post {
-            val imm = view.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.showSoftInput(jt, InputMethodManager.SHOW_IMPLICIT)
-        }
-        requireActivity().window.statusBarColor = ContextCompat.getColor(requireActivity(), R.color.status)
-        Log.d("StartupTime", "Focus took ${System.currentTimeMillis() - startTime} ms")
-    }
-
-
-
-    private fun handleCommandInput(input: String) {
-        when {
-            input.startsWith("call") -> handleCallCommand(input)
-            input.startsWith("text") -> handleTextCommand(input)
-            input == "20090606" -> handleSettingsCommand()
-            input.isNotEmpty() -> handleSearchCommand(input)
-            else -> resetViewStates()
-        }
-    }
-
-    private fun handleCallCommand(input: String) {
-        b = true
-        cAdapter.isCall = true
-        recyclerView.adapter = cAdapter
-
-        val query = input.split(" ").getOrNull(1).orEmpty()
-        if (query.isNotEmpty()) {
-            onQueryTextChange(query)
-            toggleRecyclerViews(showRecyclerView = true, showSearchView = false)
-        } else {
-            toggleRecyclerViews(showRecyclerView = false, showSearchView = true)
-        }
-    }
-
-    private fun handleTextCommand(input: String) {
-        b = true
-        cAdapter.isCall = false
-        recyclerView.adapter = cAdapter
-
-        val query = input.split(" ").getOrNull(1).orEmpty()
-        textSend = input
-
-        if (query.isNotEmpty()) {
-            onQueryTextChange(query)
-            toggleRecyclerViews(showRecyclerView = true, showSearchView = false)
-        } else {
-            toggleRecyclerViews(showRecyclerView = false, showSearchView = true)
-        }
-    }
-
-    private fun handleSearchCommand(input: String) {
-        b = false
-        recyclerView.adapter = jtAdapter
-        qSearch.clear()
-        repeat(4) { qSearch.add(input) }
-        onQueryTextChange(input)
-        toggleRecyclerViews(showRecyclerView = true, showSearchView = true)
-    }
-
-    private fun handleSettingsCommand() {
-        toggleRecyclerViews(showRecyclerView = false, showSearchView = false)
-        binding.jtSettings.settingsItem.setOnClickListener {
-            val intent = Intent(this.activity, SettingsActivity::class.java)
+        binding.btnSettings.setOnClickListener {
+            val intent = Intent(requireContext(), SettingsActivity::class.java)
             startActivity(intent)
         }
     }
 
-    private fun resetViewStates() {
-        toggleRecyclerViews(showRecyclerView = false, showSearchView = false)
-        binding.jtSettings.settingsItem.visibility = View.INVISIBLE
-    }
+    private fun updateResults(query: String) {
+        if (!isAdded) return
+        val context = context ?: return
 
-    private fun toggleRecyclerViews(showRecyclerView: Boolean, showSearchView: Boolean) {
-        binding.jtSettings.settingsItem.visibility = if (!showRecyclerView && !showSearchView) View.VISIBLE else View.INVISIBLE
-        recyclerView.visibility = if (showRecyclerView) View.VISIBLE else View.INVISIBLE
-        searchRecyclerView.visibility = if (showSearchView) View.VISIBLE else View.INVISIBLE
-    }
+        val enableCalc = SharedPreferencesHelper.getBoolean(context, "category_calc", true)
+        val enableApps = SharedPreferencesHelper.getBoolean(context, "category_apps", true)
+        val enableContacts = SharedPreferencesHelper.getBoolean(context, "category_contacts", true)
+        val enableActions = SharedPreferencesHelper.getBoolean(context, "category_actions", true)
+        val enableWeb = SharedPreferencesHelper.getBoolean(context, "category_web", true)
 
-    private fun contactsSearch() {
-        val startTime = System.currentTimeMillis()
-        val projection = arrayOf(
-            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
-            ContactsContract.CommonDataKinds.Phone.NUMBER,
-            ContactsContract.Contacts.PHOTO_URI
-        )
+        val trimmed = query.trim()
 
-        val phones: Cursor? = context?.contentResolver?.query(
-            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-            projection, null, null, null
-        )
+        if (trimmed.isEmpty()) {
+            // Empty state: show Frequently Used Apps
+            calculationAdapter.calculation = null
 
-        phones?.use { cursor ->
-            val uniqueContacts = mutableSetOf<String>()
-            while (cursor.moveToNext()) {
-                val contactName = cursor.getString(0)
-                val contactNumber = normalizePhoneNumber(cursor.getString(1))
-                val contactPhotoUri = cursor.getString(2)?.let { Uri.parse(it) }
+            val recentApps = if (enableApps) AppRepository.getFrequentlyUsedApps(6) else emptyList()
+            appsHeaderAdapter.isVisible = recentApps.isNotEmpty()
+            appsAdapter.submitList(recentApps)
 
-                if (uniqueContacts.add(contactNumber)) {
-                    contacts.add(Contact(contactName, contactNumber, contactPhotoUri))
-                }
-            }
-        }
-        cAdapter = ContactsAdapter(b, contacts)
-        Log.d("StartupTime", "Contact search took ${System.currentTimeMillis() - startTime} ms")
-    }
+            contactsHeaderAdapter.isVisible = false
+            contactsAdapter.submitList(emptyList())
 
-    override fun onQueryTextSubmit(query: String): Boolean {
-        filterAdapters(query)
-        return true
-    }
+            actionsHeaderAdapter.isVisible = false
+            actionsAdapter.submitList(emptyList())
 
-    override fun onQueryTextChange(newText: String): Boolean {
-        filterAdapters(newText)
-        return true
-    }
+            webHeaderAdapter.isVisible = false
+            webAdapter.submitList(emptyList())
 
-    private fun filterAdapters(query: String) {
-        if (b) {
-            cAdapter.filter.filter(query)
+            binding.emptyStatePrompt.isVisible = recentApps.isEmpty()
         } else {
-            jtAdapter.filter.filter(query)
-            searchAdapter?.filter?.filter(query)
+            binding.emptyStatePrompt.isVisible = false
+
+            // 1. Calculator
+            val calcResult = if (enableCalc) CalculatorEvaluator.evaluate(trimmed) else null
+            calculationAdapter.calculation = calcResult
+
+            // 2. Apps
+            val matchedApps = if (enableApps) AppRepository.searchApps(trimmed) else emptyList()
+            appsHeaderAdapter.isVisible = matchedApps.isNotEmpty()
+            appsAdapter.submitList(matchedApps)
+
+            // 3. Contacts
+            val matchedContacts = if (enableContacts) ContactRepository.searchContacts(trimmed) else emptyList()
+            contactsHeaderAdapter.isVisible = matchedContacts.isNotEmpty()
+            contactsAdapter.submitList(matchedContacts)
+
+            // 4. Quick Actions
+            val actions = if (enableActions) QuickActionsManager.getActionsForQuery(trimmed) else emptyList()
+            actionsHeaderAdapter.isVisible = actions.isNotEmpty()
+            actionsAdapter.submitList(actions)
+
+            // 5. Web Search
+            val engines = if (enableWeb) WebSearchManager.getEngines(context) else emptyList()
+            val webItems = engines.map { WebSearchItem(it, trimmed) }
+            webHeaderAdapter.isVisible = webItems.isNotEmpty()
+            webAdapter.submitList(webItems)
         }
     }
 
-    private fun debounce(delay: Long = 300L, action: () -> Unit) {
+    private fun setupWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.searchJT) { _, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            binding.searchJT.updatePadding(
+                left = insets.left,
+                top = insets.top,
+                right = insets.right,
+                bottom = insets.bottom
+            )
+            windowInsets
+        }
+    }
+
+    private fun configureKeyboardAndStatusBar() {
+        binding.jtInput.requestFocus()
+        binding.jtInput.post {
+            val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+            imm?.showSoftInput(binding.jtInput, InputMethodManager.SHOW_IMPLICIT)
+        }
+        activity?.window?.let { window ->
+            WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
+        }
+    }
+
+    private fun debounce(delayMs: Long = 120L, action: () -> Unit) {
         debounceJob?.cancel()
         debounceJob = viewLifecycleOwner.lifecycleScope.launch {
-            delay(delay)
+            delay(delayMs)
             action()
         }
     }
 
-
-    private fun normalizePhoneNumber(phoneNumber: String): String {
-        return phoneNumber.filter { it.isDigit() }
+    override fun onResume() {
+        super.onResume()
+        // Refresh when returning from settings or app launches
+        updateResults(binding.jtInput.text.toString())
     }
 
-    companion object {
-        var textSend: String = ""
+    override fun onDestroyView() {
+        super.onDestroyView()
+        debounceJob?.cancel()
+        _binding = null
     }
 }
