@@ -27,12 +27,15 @@ class SearchAdapter : ListAdapter<WebSearchItem, SearchAdapter.ViewHolder>(DiffC
         holder.name.text = item.engine.name
         holder.queryPreview.text = "Search for \"${item.query}\""
 
-        holder.itemView.setOnClickListener {
+        val clickListener = View.OnClickListener {
             item.engine.executeSearch(it.context, item.query)
         }
+        holder.card.setOnClickListener(clickListener)
+        holder.itemView.setOnClickListener(clickListener)
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val card: View = itemView.findViewById(R.id.web_card)
         val icon: ImageView = itemView.findViewById(R.id.jt_web_icon)
         val name: TextView = itemView.findViewById(R.id.jt_web_name)
         val queryPreview: TextView = itemView.findViewById(R.id.jt_web_query_preview)

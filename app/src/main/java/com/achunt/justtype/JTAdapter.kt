@@ -28,7 +28,7 @@ class JTAdapter(private val context: Context) :
             holder.appIcon.setImageResource(R.drawable.ic_launcher_foreground)
         }
 
-        holder.itemView.setOnClickListener {
+        val clickListener = View.OnClickListener {
             AppRepository.recordLaunch(context, app.packageName)
             val launchIntent = context.packageManager.getLaunchIntentForPackage(app.packageName)
             if (launchIntent != null) {
@@ -41,9 +41,12 @@ class JTAdapter(private val context: Context) :
                 Toast.makeText(context, "Cannot launch ${app.label}", Toast.LENGTH_SHORT).show()
             }
         }
+        holder.card.setOnClickListener(clickListener)
+        holder.itemView.setOnClickListener(clickListener)
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val card: View = itemView.findViewById(R.id.app_card)
         val appName: TextView = itemView.findViewById(R.id.jt_app_name)
         val appIcon: ImageView = itemView.findViewById(R.id.jt_app_icon)
     }

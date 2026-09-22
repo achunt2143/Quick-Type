@@ -25,6 +25,7 @@ object WebSearchManager {
                 try {
                     val intent = Intent(Intent.ACTION_WEB_SEARCH).apply {
                         putExtra(SearchManager.QUERY, query)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     }
                     context.startActivity(intent)
                 } catch (_: Exception) {
@@ -39,7 +40,9 @@ object WebSearchManager {
             executeSearch = { context, query ->
                 try {
                     val geoUri = Uri.parse("geo:0,0?q=" + encode(query))
-                    val intent = Intent(Intent.ACTION_VIEW, geoUri)
+                    val intent = Intent(Intent.ACTION_VIEW, geoUri).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
                     context.startActivity(intent)
                 } catch (_: Exception) {
                     openBrowserUrl(context, "https://maps.google.com/?q=" + encode(query))
@@ -55,7 +58,7 @@ object WebSearchManager {
                     val intent = Intent(Intent.ACTION_SEARCH).apply {
                         `package` = "com.google.android.youtube"
                         putExtra("query", query)
-                        flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
                     }
                     context.startActivity(intent)
                 } catch (_: Exception) {
@@ -72,7 +75,7 @@ object WebSearchManager {
                     val intent = Intent(Intent.ACTION_SEARCH).apply {
                         `package` = "org.wikipedia"
                         putExtra("query", query)
-                        flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
                     }
                     context.startActivity(intent)
                 } catch (_: Exception) {
@@ -124,7 +127,9 @@ object WebSearchManager {
 
     private fun openBrowserUrl(context: Context, url: String) {
         try {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
             context.startActivity(intent)
         } catch (_: Exception) {
             Toast.makeText(context, "No browser found to open link", Toast.LENGTH_SHORT).show()

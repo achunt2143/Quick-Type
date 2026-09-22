@@ -34,16 +34,19 @@ class CalculationAdapter : RecyclerView.Adapter<CalculationAdapter.ViewHolder>()
         holder.trailingIcon.visibility = View.VISIBLE
         holder.trailingIcon.setImageResource(R.drawable.ic_content_copy)
 
-        holder.itemView.setOnClickListener {
+        val clickListener = View.OnClickListener {
             val context = it.context
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText("Calculation Result", calc.result)
             clipboard.setPrimaryClip(clip)
             Toast.makeText(context, "Copied ${calc.result} to clipboard", Toast.LENGTH_SHORT).show()
         }
+        holder.card.setOnClickListener(clickListener)
+        holder.itemView.setOnClickListener(clickListener)
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val card: View = itemView.findViewById(R.id.action_card)
         val icon: ImageView = itemView.findViewById(R.id.action_icon)
         val title: TextView = itemView.findViewById(R.id.action_title)
         val subtitle: TextView = itemView.findViewById(R.id.action_subtitle)

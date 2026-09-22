@@ -64,3 +64,13 @@ This major release completely transforms **Quick Type** into a full-fidelity imp
 - **Async Caching on Dispatchers.IO**: Background coroutines load applications and contacts with zero UI thread freezing.
 - **ConcatAdapter & ListAdapter**: Unified multi-section scrolling with `DiffUtil` for 120Hz smooth rendering.
 - **F-Droid & IzzyOnDroid Reproducible Builds**: Configured `dependenciesInfo.includeInApk = false` to eliminate non-reproducible binary metadata blobs.
+
+---
+
+### Bug Fixes & Stability
+- **Fixed Web Browser Search Crash (Closes [#2](https://github.com/achunt2143/Quick-Type/issues/2))**:
+  - Resolves issue where tapping the web browser search crashed Quick Type on Pixel 4a running Android 13.
+  - Replaced naked `Intent.ACTION_WEB_SEARCH` with robust `try-catch` handling and graceful fallback to browser URL search (`https://www.google.com/search?q=...`) if no dedicated search assistant is registered.
+  - Added explicit `<queries>` declarations in `AndroidManifest.xml` for `ACTION_WEB_SEARCH`, `http`/`https` browsers, `geo:`, YouTube, and Wikipedia to comply with Android 11+ package visibility restrictions.
+  - Added `FLAG_ACTIVITY_NEW_TASK` to all intent dispatches to prevent `AndroidRuntimeException` crashes when launching external activities.
+  - Fixed CardView touch event interception across all adapter views (`SearchAdapter`, `QuickActionsAdapter`, `CalculationAdapter`, `JTAdapter`, `ContactsAdapter`) to ensure instantaneous tap responses and Material ripples.

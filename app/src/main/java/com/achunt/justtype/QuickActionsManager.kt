@@ -34,7 +34,9 @@ object QuickActionsManager {
                     iconRes = R.drawable.ic_call,
                     execute = { ctx ->
                         try {
-                            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$digitsOnly"))
+                            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$digitsOnly")).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
                             ctx.startActivity(intent)
                         } catch (e: Exception) {
                             Toast.makeText(ctx, "Could not open dialer", Toast.LENGTH_SHORT).show()
@@ -72,6 +74,7 @@ object QuickActionsManager {
                                 putExtra(AlarmClock.EXTRA_LENGTH, seconds)
                                 putExtra(AlarmClock.EXTRA_MESSAGE, "Quick Type Timer")
                                 putExtra(AlarmClock.EXTRA_SKIP_UI, false)
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             }
                             ctx.startActivity(intent)
                         } catch (e: Exception) {
@@ -106,6 +109,7 @@ object QuickActionsManager {
                                 putExtra(AlarmClock.EXTRA_HOUR, hour)
                                 putExtra(AlarmClock.EXTRA_MINUTES, minute)
                                 putExtra(AlarmClock.EXTRA_SKIP_UI, false)
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             }
                             ctx.startActivity(intent)
                         } catch (e: Exception) {
@@ -129,7 +133,10 @@ object QuickActionsManager {
                             type = "text/plain"
                             putExtra(Intent.EXTRA_TEXT, trimmed)
                         }
-                        ctx.startActivity(Intent.createChooser(intent, "Create note with"))
+                        val chooser = Intent.createChooser(intent, "Create note with").apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        ctx.startActivity(chooser)
                     } catch (e: Exception) {
                         Toast.makeText(ctx, "Could not create note", Toast.LENGTH_SHORT).show()
                     }
@@ -149,6 +156,7 @@ object QuickActionsManager {
                         val intent = Intent(Intent.ACTION_INSERT).apply {
                             data = CalendarContract.Events.CONTENT_URI
                             putExtra(CalendarContract.Events.TITLE, trimmed)
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         }
                         ctx.startActivity(intent)
                     } catch (e: Exception) {
@@ -169,6 +177,7 @@ object QuickActionsManager {
                     try {
                         val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:")).apply {
                             putExtra(Intent.EXTRA_SUBJECT, trimmed)
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         }
                         ctx.startActivity(intent)
                     } catch (e: Exception) {
@@ -187,13 +196,17 @@ object QuickActionsManager {
                 iconRes = R.drawable.ic_play_store,
                 execute = { ctx ->
                     try {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://search?q=$trimmed"))
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://search?q=$trimmed")).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
                         ctx.startActivity(intent)
                     } catch (e: Exception) {
                         val webIntent = Intent(
                             Intent.ACTION_VIEW,
                             Uri.parse("https://play.google.com/store/search?q=$trimmed")
-                        )
+                        ).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
                         ctx.startActivity(webIntent)
                     }
                 }

@@ -24,12 +24,15 @@ class QuickActionsAdapter :
         holder.subtitle.text = action.subtitle
         holder.trailingIcon.visibility = View.GONE
 
-        holder.itemView.setOnClickListener {
+        val clickListener = View.OnClickListener {
             action.execute(it.context)
         }
+        holder.card.setOnClickListener(clickListener)
+        holder.itemView.setOnClickListener(clickListener)
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val card: View = itemView.findViewById(R.id.action_card)
         val icon: ImageView = itemView.findViewById(R.id.action_icon)
         val title: TextView = itemView.findViewById(R.id.action_title)
         val subtitle: TextView = itemView.findViewById(R.id.action_subtitle)

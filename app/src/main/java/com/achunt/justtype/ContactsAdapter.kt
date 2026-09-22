@@ -32,9 +32,11 @@ class ContactsAdapter : ListAdapter<Contact, ContactsAdapter.ViewHolder>(DiffCal
         }
 
         // Tap on card dials by default
-        holder.itemView.setOnClickListener {
+        val dialListener = View.OnClickListener {
             dialNumber(it.context, contact.number)
         }
+        holder.card.setOnClickListener(dialListener)
+        holder.itemView.setOnClickListener(dialListener)
 
         // Tap on call button dials
         holder.callButton.setOnClickListener {
@@ -79,6 +81,7 @@ class ContactsAdapter : ListAdapter<Contact, ContactsAdapter.ViewHolder>(DiffCal
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val card: View = itemView.findViewById(R.id.contact_card)
         val nameTextView: TextView = itemView.findViewById(R.id.contact_name)
         val numberTextView: TextView = itemView.findViewById(R.id.contact_number)
         val img: ImageView = itemView.findViewById(R.id.contact_icon)
